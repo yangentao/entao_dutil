@@ -24,5 +24,10 @@ part 'src/collection_sort.dart';
 part 'src/log.dart';
 part 'src/datetime.dart';
 part 'src/vararg_call.dart';
+part 'src/en_config.dart';
+part 'src/eventbus.dart';
+part 'src/json.dart';
+part 'src/result.dart';
+part 'src/notify_value.dart';
 
 

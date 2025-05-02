@@ -25,4 +25,21 @@ extension DurationExt on int {
   Duration get durationMilliSeconds => Duration(milliseconds: this);
 }
 
+extension NumExts<T extends num> on T {
+  T LE(T other) {
+    if (this > other) return other;
+    return this;
+  }
 
+  T GE(T other) {
+    if (this < other) return other;
+    return this;
+  }
+
+  //[start, end]
+  T limitClose(T start, T end) {
+    if (this < start) return start;
+    if (this > end) return end;
+    return this;
+  }
+}

@@ -1,6 +1,5 @@
 part of '../entao_dutil.dart';
 
-
 class IntRange extends Iterable<int> {
   final int start;
   final int end;
@@ -45,38 +44,13 @@ class IntRangeIterator implements Iterator<int> {
 }
 
 extension IntRangeExt on int {
-  IntRange get indexes =>
-      IntRange(start: 0,
-          end: this,
-          step: 1,
-          includeStart: true,
-          includeEnd: false);
+  IntRange get indexes => IntRange(start: 0, end: this, step: 1, includeStart: true, includeEnd: false);
 
-  IntRange to(int end, {int step = 1}) =>
-      IntRange(start: this,
-          end: end,
-          step: step,
-          includeStart: true,
-          includeEnd: true);
+  IntRange to(int end, {int step = 1}) => IntRange(start: this, end: end, step: step, includeStart: true, includeEnd: true);
 
-  IntRange until(int end, {int step = 1}) =>
-      IntRange(start: this,
-          end: end,
-          step: step,
-          includeStart: true,
-          includeEnd: false);
+  IntRange until(int end, {int step = 1}) => IntRange(start: this, end: end, step: step, includeStart: true, includeEnd: false);
 
-  IntRange downTo(int value, {int step = -1}) =>
-      IntRange(start: this,
-          end: value,
-          step: step,
-          includeStart: true,
-          includeEnd: true);
+  IntRange downTo(int value, {int step = -1}) => IntRange(start: this, end: value, step: step, includeStart: true, includeEnd: true);
 
-  IntRange downUntil(int value, {int step = -1}) =>
-      IntRange(start: this,
-          end: value,
-          step: step,
-          includeStart: true,
-          includeEnd: false);
+  IntRange downUntil(int value, {int step = -1}) => IntRange(start: this, end: value, step: step, includeStart: true, includeEnd: false);
 }
