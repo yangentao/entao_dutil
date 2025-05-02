@@ -49,24 +49,6 @@ void println([
   print(line);
 }
 
-void printX([
-  dynamic arg = _nothing,
-  dynamic arg1 = _nothing,
-  dynamic arg2 = _nothing,
-  dynamic arg3 = _nothing,
-  dynamic arg4 = _nothing,
-  dynamic arg5 = _nothing,
-  dynamic arg6 = _nothing,
-  dynamic arg7 = _nothing,
-  dynamic arg8 = _nothing,
-  dynamic arg9 = _nothing,
-]) {
-  if (!isDebugMode) return;
-  List<dynamic> ls = [arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9];
-  String line = ls.filter((e) => !identical(e, _nothing)).map((e) => e.toString()).join(" ");
-  print(line);
-}
-
 void _log(
   LogLevel level, [
   dynamic arg = _nothing,

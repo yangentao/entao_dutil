@@ -23,5 +23,6 @@ part 'src/collection_list.dart';
 part 'src/collection_sort.dart';
 part 'src/log.dart';
 part 'src/datetime.dart';
+part 'src/vararg_call.dart';
 
 
