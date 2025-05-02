@@ -1,16 +1,11 @@
-import 'package:entao_dutil/entao_dutil.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('A group of tests', () {
-    final awesome = Awesome();
-
-    setUp(() {
-      // Additional setup goes here.
-    });
+    setUp(() {});
 
     test('First Test', () {
-      expect(awesome.isAwesome, isTrue);
+      // expect(awesome.isAwesome, isTrue);
     });
   });
 }

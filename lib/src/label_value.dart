@@ -1,0 +1,52 @@
+part of '../entao_dutil.dart';
+
+typedef LabelInt = LabelValue<int>;
+
+class LabelValue<T> {
+  final String label;
+  final T value;
+
+  const LabelValue(this.label, this.value);
+
+  @override
+  bool operator ==(Object other) {
+    return other is LabelValue<T> && label == other.label && value == other.value;
+  }
+
+  @override
+  int get hashCode => label.hashCode + value.hashCode;
+
+  @override
+  String toString() {
+    return "LabelValue{label:$label, value:$value}";
+  }
+}
+
+// extension LabelValueStringExt on String {
+//   LabelValue<T> val<T>(T value) {
+//     return LabelValue<T>(this, value);
+//   }
+// }
+
+extension LabelValueStringExt<V> on String {
+  LabelValue<V> val(V value) {
+    return LabelValue<V>(this, value);
+  }
+
+  LabelValue<V> operator >>(V value) {
+    return LabelValue<V>(this, value);
+  }
+}
+
+extension SymbolKeyValue<V> on Symbol {
+  LabelValue<V> operator >>(V value) {
+    return LabelValue<V>(stringValue, value);
+  }
+}
+
+extension ListStringPairEx<T> on List<LabelValue<T>> {
+  LinkedHashMap<String, T> toMap() {
+    List<MapEntry<String, T>> meList = mapList((e) => MapEntry<String, T>(e.label, e.value));
+    return LinkedHashMap<String, T>.fromEntries(meList);
+  }
+}
