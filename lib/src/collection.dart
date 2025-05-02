@@ -1,6 +1,14 @@
 part of '../entao_dutil.dart';
 
 extension IterableExt<E> on Iterable<E> {
+  Map<K, E> toMap<K>(K Function(E) block) {
+    Map<K, E> map = {};
+    for (E e in this) {
+      map[block(e)] = e;
+    }
+    return map;
+  }
+
   Map<K, List<E>> groupBy<K>(K Function(E) key) {
     var map = <K, List<E>>{};
     for (var element in this) {
@@ -42,7 +50,7 @@ extension IterableExt<E> on Iterable<E> {
   List<T> mapList<T>(T Function(E e) block) {
     List<T> ls = [];
     for (var e in this) {
-      ls .add( block(e) ) ;
+      ls.add(block(e));
     }
     return ls;
   }
@@ -51,7 +59,7 @@ extension IterableExt<E> on Iterable<E> {
     List<T> ls = [];
     int i = 0;
     for (var e in this) {
-      ls .add( block(i, e) );
+      ls.add(block(i, e));
       i += 1;
     }
     return ls;
@@ -63,5 +71,59 @@ extension IterableExt<E> on Iterable<E> {
 
   List<E> filter(bool Function(E e) condition) {
     return where(condition).toList();
+  }
+}
+
+extension ListNumExt<T extends num> on Iterable<T> {
+  double? avgValue() {
+    return sumValues()?.let((e) => e / length);
+  }
+
+  T? sumValues() {
+    T? m;
+    for (T a in this) {
+      if (m == null) {
+        m = a;
+      } else {
+        m = (m + a) as T;
+      }
+    }
+    return m;
+  }
+
+  T? maxValue() {
+    T? m;
+    for (var a in this) {
+      if (m == null || m < a) {
+        m = a;
+      }
+    }
+    return m;
+  }
+
+  T? minValue() {
+    T? m;
+    for (var a in this) {
+      if (m == null || m > a) {
+        m = a;
+      }
+    }
+    return m;
+  }
+}
+
+extension NullableIterableExtensions22<T extends Object> on Iterable<T?> {
+  List<T> get nonNullList => nonNulls.toList();
+}
+
+extension MapGetOrPut<K, V> on Map<K, V> {
+  V getOrPut(K key, V Function() onMiss) {
+    V? v = this[key];
+    if (v != null) {
+      return v;
+    }
+    V vv = onMiss();
+    this[key] = vv;
+    return vv;
   }
 }

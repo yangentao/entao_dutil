@@ -22,17 +22,13 @@ class LabelValue<T> {
   }
 }
 
-// extension LabelValueStringExt on String {
-//   LabelValue<T> val<T>(T value) {
-//     return LabelValue<T>(this, value);
-//   }
-// }
+extension LabelValueExt on String {
+  LabelValue<T> val<T>(T value) {
+    return LabelValue<T>(this, value);
+  }
+}
 
 extension LabelValueStringExt<V> on String {
-  LabelValue<V> val(V value) {
-    return LabelValue<V>(this, value);
-  }
-
   LabelValue<V> operator >>(V value) {
     return LabelValue<V>(this, value);
   }
@@ -45,8 +41,8 @@ extension SymbolKeyValue<V> on Symbol {
 }
 
 extension ListStringPairEx<T> on List<LabelValue<T>> {
-  LinkedHashMap<String, T> toMap() {
+  Map<String, T> toMap() {
     List<MapEntry<String, T>> meList = mapList((e) => MapEntry<String, T>(e.label, e.value));
-    return LinkedHashMap<String, T>.fromEntries(meList);
+    return Map<String, T>.fromEntries(meList);
   }
 }

@@ -1,8 +1,13 @@
 part of '../entao_dutil.dart';
 
+const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
+const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
+const bool isDebugMode = !isReleaseMode && !isProfileMode;
+
 typedef OnValue<T> = void Function(T value);
 typedef OnLabel<T> = String Function(T value);
 
+typedef VoidCallback = void Function();
 typedef FuncVoid = void Function();
 typedef VoidFunc = void Function();
 typedef FuncP<P> = void Function(P);
@@ -28,6 +33,15 @@ typedef ListString = List<String>;
 
 typedef PropMap = Map<String, dynamic>;
 
+extension LetBlock<T> on T {
+  R let<R>(R Function(T e) block) => block(this);
+
+  T also(void Function(T) block) {
+    block(this);
+    return this;
+  }
+}
+
 class Rand {
   /// [minVal, maxVal)
   static int next(int minVal, int maxVal) {
@@ -46,8 +60,16 @@ extension CastToExt on Object {
   }
 }
 
-Future<void> delayCall(int milliSeconds, VoidFunc callback) {
+Future<void> delayMills(int millSeconds, [FutureOr<void> Function()? callback]) {
+  return Future.delayed(Duration(milliseconds: millSeconds), callback);
+}
+
+Future<void> delayCall(int milliSeconds, FutureOr<void> Function() callback) {
   return Future.delayed(Duration(milliseconds: milliSeconds), callback);
+}
+
+Future<void> postAction(FutureOr<void> Function() callback) {
+  return Future.delayed(Duration(milliseconds: 0), callback);
 }
 
 class DelayCall {
@@ -83,4 +105,36 @@ extension UriAppendArgumentsExt on Uri {
     }
     return uri.replace(queryParameters: newMap);
   }
+}
+
+class ResultException implements Exception {
+  String message;
+  int code;
+
+  ResultException(this.message, this.code);
+}
+
+class HareException implements Exception {
+  final dynamic message;
+
+  HareException([this.message]);
+
+  @override
+  String toString() {
+    Object? message = this.message;
+    if (message == null) return "HareError";
+    return "HareError: $message";
+  }
+}
+
+Never fatal(String? msg) {
+  throw Exception(msg);
+}
+
+Never error(String? msg) {
+  throw Exception(msg);
+}
+
+Never errorHare(String? msg) {
+  throw HareException(msg);
 }

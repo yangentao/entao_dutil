@@ -1,5 +1,40 @@
 part of '../entao_dutil.dart';
 
+bool isBlank(String? s) {
+  return s == null || s.isEmpty;
+}
+
+bool notBlank(String? s) {
+  return s != null && s.isNotEmpty;
+}
+
+String? blankNull(String? a, String? b) {
+  if (a != null && a.isNotEmpty) return a;
+  if (b != null && b.isNotEmpty) return b;
+  return null;
+}
+
+String blankOr(String? a, String? b, [String miss = ""]) {
+  if (a != null && a.isNotEmpty) return a;
+  if (b != null && b.isNotEmpty) return b;
+  return miss;
+}
+
+String joinPath(String a, String b, {String sep = "/"}) {
+  if (a.endsWith(sep)) {
+    return b.startsWith(sep) ? a + b.substring(1) : a + b;
+  } else {
+    return b.startsWith(sep) ? a + b : (a.isEmpty ? b : (b.isEmpty ? a : a + sep + b));
+  }
+}
+
+String joinPaths(List<String> paths, {String sep = "/"}) {
+  if (paths.isEmpty) return "";
+  if (paths.length == 1) return paths.first;
+  if (paths.length == 2) return joinPath(paths.first, paths[1]);
+  return joinPath(paths.first, joinPaths(paths.sublist(1)));
+}
+
 abstract class Regs {
   static final RegExp digits = RegExp(r'[0-9]+');
   static final RegExp integers = RegExp(r'[-+0-9]+');
@@ -12,6 +47,18 @@ extension SymbolEx on Symbol {
   String get stringValue {
     return toString().substringAfter("\"").substringBeforeLast("\"");
   }
+}
+
+extension ObjectStringKey on Object {
+  String get stringKey {
+    if (this is String) return this as String;
+    if (this is Symbol) return (this as Symbol).stringValue;
+    error("NOT a String OR Symbol");
+  }
+}
+
+extension Uint8List2String on Uint8List {
+  String utf8String() => utf8.decode(this);
 }
 
 extension ListInt2String on List<int> {
