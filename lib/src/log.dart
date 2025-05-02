@@ -23,9 +23,9 @@ class LogConfig {
   static String Function(dynamic value) textConvert = (v) => v.toString();
 }
 
-typedef LogPrinter = void Function(Object?);
+typedef LogPrinter = void Function(String?);
 
-List<LogPrinter> LogPrinters = [print];
+List<LogPrinter> globalLogPrinters = [print];
 
 //end不能时const, 否则就跟_nothing指向了同一个对象, 无法区分了.
 final Object end = Object();
@@ -42,7 +42,7 @@ void println([
   dynamic arg7 = _nothing,
   dynamic arg8 = _nothing,
   dynamic arg9 = _nothing,
-] ) {
+]) {
   if (!isDebugMode) return;
   List<dynamic> ls = [arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9];
   String line = ls.filter((e) => !identical(e, _nothing)).map((e) => e.toString()).join(" ");
@@ -80,11 +80,11 @@ void _log(
   dynamic arg8 = _nothing,
   dynamic arg9 = _nothing,
 ]) {
-  if(!level.allowed) return ;
+  if (!level.allowed) return;
   List<dynamic> ls = [arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9];
   String line = ls.filter((e) => !identical(e, _nothing)).map((e) => e.toString()).join(" ");
   String tm = DateTime.now().formatDateTimeX;
-  for (LogPrinter p in LogPrinters) {
+  for (LogPrinter p in globalLogPrinters) {
     p("$tm ${level.name}: $line");
   }
 }
