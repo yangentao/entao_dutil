@@ -1,4 +1,6 @@
-part of '../entao_dutil.dart';
+import 'collection.dart';
+import 'datetime.dart';
+import 'basic.dart';
 
 enum LogLevel {
   ALL,

@@ -1,4 +1,7 @@
-part of '../entao_dutil.dart';
+import 'dart:math' as math;
+
+import 'basic.dart';
+import 'intrange.dart';
 
 extension ListExtensions<E> on List<E> {
   List<E> operator <<(E e) {

@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+
 
 typedef BusCallback = void Function(Object event, Object? arg);
 

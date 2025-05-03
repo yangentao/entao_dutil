@@ -1,4 +1,9 @@
-part of '../entao_dutil.dart';
+import 'dart:async';
+import 'dart:collection';
+import 'dart:math' as math;
+
+import 'datetime.dart';
+
 
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');

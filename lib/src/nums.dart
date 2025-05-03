@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+import 'package:intl/intl.dart' as intl;
 
 //
 // 0 A single digit

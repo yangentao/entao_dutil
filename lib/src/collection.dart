@@ -1,4 +1,6 @@
-part of '../entao_dutil.dart';
+import 'dart:collection';
+
+import 'basic.dart';
 
 extension IterableExt<E> on Iterable<E> {
   Map<K, E> toMap<K>(K Function(E) block) {

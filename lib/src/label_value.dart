@@ -1,4 +1,5 @@
-part of '../entao_dutil.dart';
+import 'collection.dart';
+import 'strings.dart';
 
 typedef LabelInt = LabelValue<int>;
 

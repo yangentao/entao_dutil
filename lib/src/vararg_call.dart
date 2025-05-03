@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+import 'basic.dart';
 
 typedef VarargCallback = void Function(List<dynamic> args, Map<String, dynamic> kwargs);
 

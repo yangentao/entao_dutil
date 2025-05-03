@@ -1,4 +1,7 @@
-part of '../entao_dutil.dart';
+import 'dart:convert';
+
+import 'collection.dart';
+import 'strings.dart';
 
 class JsonModel {
   JsonValue jsonValue;

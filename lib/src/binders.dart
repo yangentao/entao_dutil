@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+import 'basic.dart';
 
 
 FuncVoid? bindOne<T>(T value, FuncP<T>? callback) {

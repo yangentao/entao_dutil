@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+import 'basic.dart';
 
 class NotifyValue<T> {
   T value;

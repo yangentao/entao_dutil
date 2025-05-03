@@ -1,4 +1,6 @@
-part of '../entao_dutil.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 typedef ProgressCallback = void Function({int total, int current});
 

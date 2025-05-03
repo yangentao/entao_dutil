@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+
 
 extension ListSortExt<E> on List<E> {
   void sortX(int Function(E, E)? compare, {bool desc = false}) {

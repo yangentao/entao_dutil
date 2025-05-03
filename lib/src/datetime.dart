@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+import 'nums.dart';
 
 int get currentMilliSeconds1970 => DateTime.now().millisecondsSinceEpoch;
 

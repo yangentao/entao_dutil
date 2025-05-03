@@ -1,4 +1,4 @@
-part of '../entao_dutil.dart';
+
 
 class DataResult<T> extends BaseResult {
   final T? data;

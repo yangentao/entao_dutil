@@ -1,4 +1,6 @@
-part of '../entao_dutil.dart';
+import 'basic.dart';
+import 'collection.dart';
+import 'strings.dart';
 
 class EnConfig {
   EnConfig._();
