@@ -4,7 +4,6 @@ import 'dart:math' as math;
 
 import 'datetime.dart';
 
-
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
 const bool isDebugMode = !isReleaseMode && !isProfileMode;
@@ -142,4 +141,35 @@ Never error(String? msg) {
 
 Never errorHare(String? msg) {
   throw HareException(msg);
+}
+
+class AnyProp<T extends Object> {
+  final PropMap _map;
+  final String key;
+  final T? missValue;
+
+  AnyProp({required PropMap map, required this.key, this.missValue}) : _map = map;
+
+  T? get value {
+    return _map[key] ?? missValue;
+  }
+
+  set value(T? newValue) {
+    if (newValue == null) {
+      _map.remove(key);
+    } else {
+      _map[key] = newValue;
+    }
+  }
+
+  bool get exists => _map.containsKey(key);
+
+  T? remove() {
+    return _map.remove(key);
+  }
+
+  @override
+  String toString() {
+    return "$runtimeType{ key=$key, value=$value }";
+  }
 }
