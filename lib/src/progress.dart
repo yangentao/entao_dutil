@@ -27,6 +27,7 @@ class ProgressPublish {
 
 extension StreamReadBytesExt on Stream<List<int>> {
   Stream<List<int>> progress({required int total, ProgressCallback? onProgress, int? delayMS}) {
+    if (onProgress == null) return this;
     ProgressPublish pp = ProgressPublish(total, onProgress, delayMS: delayMS);
     return transform(StreamTransformer.fromHandlers(handleData: (List<int> data, EventSink<List<int>> sink) {
       pp.add(data.length);

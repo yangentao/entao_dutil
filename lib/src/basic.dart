@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
 
-import 'datetime.dart';
+import 'package:entao_dutil/entao_dutil.dart';
 
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
@@ -98,7 +98,14 @@ class DelayCall {
   }
 }
 
+
 extension UriAppendArgumentsExt on Uri {
+  /// 返回新的Uri
+  Uri appendParams(Map<String, String> args) {
+    return appendedParams(args);
+  }
+
+  /// 返回新的Uri
   Uri appendedParams(Map<String, String> args) {
     Uri uri = this;
     LinkedHashMap<String, List<String>> newMap = LinkedHashMap<String, List<String>>.from(uri.queryParametersAll);
@@ -108,6 +115,11 @@ extension UriAppendArgumentsExt on Uri {
       newMap[p.key] = ls;
     }
     return uri.replace(queryParameters: newMap);
+  }
+
+  /// 返回新的Uri
+  Uri appendPath(String path) {
+    return replace(path: joinPath(this.path, path));
   }
 }
 
