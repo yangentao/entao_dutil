@@ -10,3 +10,6 @@
 
 ## 1.0.3
 * Uri.appendPath
+
+## 1.0.5
+* numbers
