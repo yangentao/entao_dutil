@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -80,7 +81,84 @@ extension ListInt2String on List<int> {
   String utf8String() => utf8.decode(this);
 }
 
+Map<String, V> mapIgnoreCase<V>() {
+  return SplayTreeMap(IgnoreCase.compare);
+}
+
+class IgnoreCase {
+  IgnoreCase._();
+
+  static const int _A = 0x41;
+  static const int _Z = 0x5A;
+  static const int _a = 0x61;
+  static const int _z = 0x7A;
+  static const int _delta = 0x20;
+
+  static bool isUpper(int ch) => ch >= _A && ch <= _Z;
+
+  static bool isLower(int ch) => ch >= _a && ch <= _z;
+
+  static bool equals(String left, String right) {
+    if (left.length != right.length) return false;
+    for (int i = 0; i < left.length; ++i) {
+      final int chA = left.codeUnitAt(i);
+      final int chB = right.codeUnitAt(i);
+      if (chA == chB) continue;
+      if (isUpper(chA)) {
+        if (isLower(chB)) {
+          if (chA + _delta == chB) continue;
+        }
+      } else if (isLower(chA)) {
+        if (isUpper(chB)) {
+          if (chA - _delta == chB) continue;
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+
+  static int compare(String left, String right) {
+    int count = left.length > right.length ? right.length : left.length;
+    for (int i = 0; i < count; ++i) {
+      final int chA = left.codeUnitAt(i);
+      final int chB = right.codeUnitAt(i);
+      if (chA == chB) continue;
+      if (isUpper(chA)) {
+        if (isUpper(chB)) return chA - chB;
+        if (isLower(chB)) {
+          int c = chA + _delta - chB;
+          if (c == 0) continue;
+          return c;
+        }
+        return chA - chB;
+      } else if (isLower(chA)) {
+        if (isLower(chB)) return chA - chB;
+        if (isUpper(chB)) {
+          int c = chA - _delta - chB;
+          if (c == 0) continue;
+          return c;
+        }
+        return chA - chB;
+      } else {
+        return chA - chB;
+      }
+    }
+    return left.length - right.length;
+  }
+}
+
 extension StringExtension on String {
+  bool equals(String other, {bool ignoreCase = false}) {
+    if (!ignoreCase) return this == other;
+    return IgnoreCase.equals(this, other);
+  }
+
+  int compare(String other, {bool ignoreCase = false}) {
+    if (!ignoreCase) return this.compareTo(other);
+    return IgnoreCase.compare(this, other);
+  }
+
   String get quoted => "\"$this\"";
 
   String get singleQuoted => "'$this'";

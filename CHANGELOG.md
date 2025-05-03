@@ -13,3 +13,6 @@
 
 ## 1.0.5
 * numbers
+
+## 1.0.6
+* Ignore case.
