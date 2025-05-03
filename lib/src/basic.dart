@@ -8,6 +8,7 @@ const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
 const bool isDebugMode = !isReleaseMode && !isProfileMode;
 
+typedef Predicate<T> = bool Function(T);
 typedef OnValue<T> = void Function(T value);
 typedef OnLabel<T> = String Function(T value);
 

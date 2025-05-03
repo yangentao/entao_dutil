@@ -1,4 +1,46 @@
+import 'package:entao_dutil/src/collection.dart';
 import 'package:intl/intl.dart' as intl;
+
+class Hex {
+  Hex._();
+
+  static String encodeBytes(List<int> data) {
+    return data.mapList((e) => e.hexString(width: 2)).join(" ");
+  }
+
+  static String encode(int value, {int bytes = 0, bool upper = true}) {
+    String text = value.toRadixString(16);
+    if (upper) text = text.toUpperCase();
+    if (bytes > 0 && bytes <= 8) {
+      text = text.padLeft(16, '0');
+      if (bytes == 8) return text;
+      return text.substring(text.length - bytes * 2);
+    }
+    return text;
+  }
+}
+
+extension IntHexExt on int {
+  //[start, end)
+  int limitOpen(int start, int end) {
+    if (this < start) return start;
+    if (this >= end) {
+      if (end - 1 < start) {
+        return start;
+      }
+      return end - 1;
+    }
+    return this;
+  }
+  String hexString({int? width, bool upper = true, String padding = '0'}) {
+    String s = toRadixString(16);
+    if (upper) s = s.toUpperCase();
+    if (width != null && width > 0) {
+      s = s.padLeft(width, padding);
+    }
+    return s;
+  }
+}
 
 //
 // 0 A single digit

@@ -1,7 +1,39 @@
 import 'dart:math' as math;
 
+import 'package:entao_dutil/src/collection.dart';
+
 import 'basic.dart';
 import 'intrange.dart';
+
+extension ListSliceEx<T> on List<T> {
+  T? get second => this.getOr(1);
+
+  T? get third => this.getOr(2);
+
+  T? get lastSecond => this.getOr(length - 2);
+
+  List<T> slice(int start, int size) {
+    if (start >= length) return [];
+    if (start + size >= length) return sublist(start);
+    return sublist(start, start + size);
+  }
+
+  List<T> removeAll(Predicate<T> p) {
+    List<T> ls = this.filter(p);
+    this.removeWhere(p);
+    return ls;
+  }
+
+  T? removeFirst(Predicate<T> p) {
+    int idx = this.indexWhere(p);
+    if (idx < 0) return null;
+    T item = this[idx];
+    this.removeAt(idx);
+    return item;
+  }
+
+  IntRange get indexes => length.indexes;
+}
 
 extension ListExtensions<E> on List<E> {
   List<E> operator <<(E e) {
