@@ -1,6 +1,5 @@
 import 'basic.dart';
 
-
 FuncVoid? bindOne<T>(T value, FuncP<T>? callback) {
   if (callback == null) return null;
   return OneBinder<T>(value, callback).call;

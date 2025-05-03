@@ -19,3 +19,6 @@
 
 ## 1.0.7
 * SomeProp.
+
+## 1.0.8
+* MsgCenter.

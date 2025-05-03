@@ -1,5 +1,3 @@
-
-
 typedef BusCallback = void Function(Object event, Object? arg);
 
 class EventBus {

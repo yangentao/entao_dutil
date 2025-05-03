@@ -1,6 +1,6 @@
+import 'basic.dart';
 import 'collection.dart';
 import 'datetime.dart';
-import 'basic.dart';
 
 enum LogLevel {
   ALL,

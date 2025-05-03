@@ -1,5 +1,3 @@
-
-
 extension ListSortExt<E> on List<E> {
   void sortX(int Function(E, E)? compare, {bool desc = false}) {
     if (!desc) {

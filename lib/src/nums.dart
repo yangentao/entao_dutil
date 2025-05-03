@@ -32,6 +32,7 @@ extension IntHexExt on int {
     }
     return this;
   }
+
   String hexString({int? width, bool upper = true, String padding = '0'}) {
     String s = toRadixString(16);
     if (upper) s = s.toUpperCase();
