@@ -16,3 +16,6 @@
 
 ## 1.0.6
 * Ignore case.
+
+## 1.0.7
+* SomeProp.

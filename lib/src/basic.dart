@@ -99,7 +99,6 @@ class DelayCall {
   }
 }
 
-
 extension UriAppendArgumentsExt on Uri {
   /// 返回新的Uri
   Uri appendParams(Map<String, String> args) {
@@ -164,6 +163,37 @@ class AnyProp<T extends Object> {
   AnyProp({required PropMap map, required this.key, this.missValue}) : _map = map;
 
   T? get value {
+    return _map[key] ?? missValue;
+  }
+
+  set value(T? newValue) {
+    if (newValue == null) {
+      _map.remove(key);
+    } else {
+      _map[key] = newValue;
+    }
+  }
+
+  bool get exists => _map.containsKey(key);
+
+  T? remove() {
+    return _map.remove(key);
+  }
+
+  @override
+  String toString() {
+    return "$runtimeType{ key=$key, value=$value }";
+  }
+}
+
+class SomeProp<T extends Object> {
+  final PropMap _map;
+  final String key;
+  final T missValue;
+
+  SomeProp({required PropMap map, required this.key, required this.missValue}) : _map = map;
+
+  T get value {
     return _map[key] ?? missValue;
   }
 
