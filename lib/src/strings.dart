@@ -2,8 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:uuid/uuid.dart';
+
 import 'basic.dart';
 import 'collection.dart';
+
+const Uuid _uuid = Uuid();
+
+String uuidString({bool sep = false}) {
+  String s = _uuid.v4();
+  if (sep) return s;
+  return s.replaceAll("-", "");
+}
 
 bool isBlank(String? s) {
   return s == null || s.isEmpty;
