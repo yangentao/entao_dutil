@@ -3,6 +3,20 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:os_detect/os_detect.dart' as osd;
+
+class OSDetect {
+  OSDetect._();
+
+  static final String name = osd.operatingSystem;
+  static final String version = osd.operatingSystemVersion;
+  static final bool isMacos = osd.isMacOS;
+  static final bool isWindows = osd.isWindows;
+  static final bool isLinux = osd.isLinux;
+  static final bool isIOS = osd.isIOS;
+  static final bool isAndroid = osd.isAndroid;
+  static final bool isBrowser = osd.isBrowser;
+}
 
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');

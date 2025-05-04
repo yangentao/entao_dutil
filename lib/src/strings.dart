@@ -36,6 +36,7 @@ String blankOr(String? a, String? b, [String miss = ""]) {
   return miss;
 }
 
+// TODO windows
 String joinPath(String a, String b, {String sep = "/"}) {
   if (a.endsWith(sep)) {
     return b.startsWith(sep) ? a + b.substring(1) : a + b;
