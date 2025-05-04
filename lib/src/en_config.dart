@@ -1,3 +1,5 @@
+import 'package:entao_dutil/src/collection_list.dart';
+
 import 'basic.dart';
 import 'collection.dart';
 import 'strings.dart';
@@ -28,6 +30,9 @@ extension StrignEnExt on String {
   String get enEscaped => _enEscape(this);
 }
 
+const int _SHARP = 0x23; // #
+const int _SL = 0x5C; // \
+
 class EnConfigParser {
   final bool allowKeyPath;
   final List<int> data;
@@ -35,9 +40,19 @@ class EnConfigParser {
 
   EnConfigParser(String text, {this.allowKeyPath = true}) : data = text.codeUnits;
 
-  bool get _end => _current >= data.length;
+  bool get _end {
+    if (_current >= data.length) return true;
+    if (data[_current] == _SHARP && _SL != _preChar) {
+      while (_current < data.length && !data[_current].isCRLF) {
+        _current += 1;
+      }
+    }
+    return _current >= data.length;
+  }
 
   int get _currentChar => data[_current];
+
+  int? get _preChar => data.getOr(_current - 1);
 
   int _firstChar() {
     _skipSpTabCrLf();
