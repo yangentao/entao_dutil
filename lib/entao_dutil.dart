@@ -22,3 +22,7 @@ export 'src/progress.dart';
 export 'src/result.dart';
 export 'src/strings.dart';
 export 'src/vararg_call.dart';
+export 'src/bits.dart';
+export 'src/tcp_client.dart';
+export 'src/modbus.dart';
+export 'src/ini_file.dart';

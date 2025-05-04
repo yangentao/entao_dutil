@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:entao_dutil/src/collection_list.dart';
 import 'package:uuid/uuid.dart';
 
 import 'basic.dart';
@@ -260,4 +261,18 @@ extension StringExtension on String {
     }
     return miss ?? this;
   }
+}
+
+final RegExp _itemSep = RegExp(r"[,;]");
+final RegExp _attrSep = RegExp(r"[=:]");
+//a=1;b:2,c:3   => [(a,1), (b,2), (c, 3)]
+List<MapEntry<String, String>> parseProperties(String text, {Pattern? itemSep, Pattern? attrSep}) {
+  List<String> items = text.split(itemSep ?? _itemSep).mapList((e) => e.trim()).filter((e) => e.isNotEmpty);
+  List<MapEntry<String, String>> values = [];
+  for (String item in items) {
+    List<String> pair = item.split(attrSep ?? _attrSep).mapList((e) => e.trim());
+    if (pair.isEmpty) continue;
+    values.add(MapEntry<String, String>(pair.first.trim(), pair.second?.trim() ?? ""));
+  }
+  return values;
 }

@@ -22,3 +22,6 @@
 
 ## 1.0.8
 * MsgCenter.
+
+## 1.0.9
+* ini file, modbus, tcp client, bits.

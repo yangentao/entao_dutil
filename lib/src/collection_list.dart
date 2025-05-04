@@ -41,6 +41,7 @@ extension ListExtensions<E> on List<E> {
     return this;
   }
 
+  /// 0,1,2,3
   E? lastValue([int index = 0]) {
     return this.getOr(length - 1 - index);
   }
