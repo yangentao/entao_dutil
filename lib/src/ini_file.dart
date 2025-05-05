@@ -3,29 +3,41 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:entao_dutil/src/collection.dart';
-import 'package:entao_dutil/src/collection_list.dart';
 import 'package:entao_dutil/src/strings.dart';
 
-class ini {
-  ini._();
+class IniFile {
+  Map<String, Map<String, String>> data;
 
-  static List<IniItem>? read(File file) {
-    String? s = file.readText();
-    if (s == null) return null;
-    return parseText(s);
+  bool get isEmpty => data.isEmpty;
+
+  bool get isNoEmpty => data.isNotEmpty;
+
+  IniFile(this.data);
+
+  String? get(String key, {String section = ""}) {
+    return data[section]?[key];
   }
 
-  static void write(File file, List<IniItem> items) {
-    String text = toText(items);
-    file.writeAsStringSync(text);
+  void put(String key, String value, {String section = ""}) {
+    data.getOrPut(section, () => {})[key] = value;
   }
 
-  static List<IniItem> parseText(String text) {
-    List<IniItem> items = [];
+  static IniFile read(File file) {
+    String s = file.readAsStringSync();
+    return parse(s);
+  }
+
+  static IniFile parse(String text, {String comment = ";"}) {
+    Map<String, Map<String, String>> map = {};
     List<String> lines = text.splitLines();
     String sec = "";
     for (String line in lines) {
-      String ln = line.substringBefore("#").trim();
+      final String ln;
+      if (comment.isNotEmpty) {
+        ln = line.substringBefore(comment).trim();
+      } else {
+        ln = line.trim();
+      }
       if (ln.length < 3) continue; //[a], a=1
       if (ln[0] == '[' && ln[ln.length - 1] == ']') {
         sec = ln.substring(1, ln.length - 1).trim();
@@ -36,36 +48,39 @@ class ini {
       String k = ln.substring(0, idx).trim();
       String v = ln.substring(idx + 1).trim();
       if (k.isEmpty) continue;
-      items << IniItem(key: k, value: v, section: sec);
+      map.getOrPut(sec, () => {})[k] = v;
     }
-
-    return items;
+    return IniFile(map);
   }
 
-  static String toText(List<IniItem> items) {
-    Map<String, List<IniItem>> map = items.groupBy((e) => e.section);
-    String text = "";
-    List<IniItem>? globalItems = map.remove("");
-    if (globalItems != null && globalItems.isNotEmpty) {
-      for (var e in globalItems) {
-        text += "${e.key}=${e.value}\n";
+  void write(File file) {
+    String text = toText();
+    file.writeAsStringSync(text);
+  }
+
+  String toText() {
+    StringBuffer buf = StringBuffer();
+    Map<String, String>? m = data[""];
+    if (m != null) {
+      for (MapEntry<String, String> kv in m.entries) {
+        buf.writeln("${kv.key}=${kv.value}");
       }
     }
-    String preSection = "";
-    for (MapEntry<String, List<IniItem>> e in map.entries) {
-      if (e.key != preSection) {
-        preSection = e.key;
-        if (text.isEmpty) {
-          text += "[${e.key}]\n";
-        } else {
-          text += "\n[${e.key}]\n";
-        }
+    for (MapEntry<String, Map<String, String>> e in data.entries) {
+      if (e.key.isEmpty) {
+        continue;
       }
-      for (IniItem item in e.value) {
-        text += "${item.toText()}\n";
+      buf.writeln("[${e.key}]");
+      for (MapEntry<String, String> kv in e.value.entries) {
+        buf.writeln("${kv.key}=${kv.value}");
       }
     }
-    return text;
+    return buf.toString();
+  }
+
+  @override
+  String toString() {
+    return toText();
   }
 }
 

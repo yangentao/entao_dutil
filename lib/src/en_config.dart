@@ -17,7 +17,7 @@ class EnConfig {
   }
 
   static EnValue parse(String text, {bool allowKeyPath = true}) {
-    EnConfigParser p = EnConfigParser(text, allowKeyPath: allowKeyPath);
+    _EnConfigParser p = _EnConfigParser(text, allowKeyPath: allowKeyPath);
     return p.parse();
   }
 
@@ -33,12 +33,12 @@ extension StrignEnExt on String {
 const int _SHARP = 0x23; // #
 const int _SL = 0x5C; // \
 
-class EnConfigParser {
+class _EnConfigParser {
   final bool allowKeyPath;
   final List<int> data;
   int _current = 0;
 
-  EnConfigParser(String text, {this.allowKeyPath = true}) : data = text.codeUnits;
+  _EnConfigParser(String text, {this.allowKeyPath = true}) : data = text.codeUnits;
 
   bool get _end {
     if (_current >= data.length) return true;
@@ -195,17 +195,7 @@ class EnConfigParser {
     if (escing) {
       _err("解析错误,转义.");
     }
-    //trim end
-    int idx = 0;
-    while (idx < buf.length) {
-      int ch = data[_current - 1 - idx];
-      if (ch != _SP) break;
-      int preIdx = _current - 1 - idx - 1;
-      if (preIdx > 0 && data[preIdx] == _BSLASH) break;
-      idx += 1;
-    }
-    if (idx > 0) return buf.toString().substring(0, buf.length - idx);
-    return buf.toString();
+    return buf.toString().trim();
   }
 
   void _tokenc(List<int> cs) {
