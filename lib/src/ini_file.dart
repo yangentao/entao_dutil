@@ -6,39 +6,21 @@ import 'package:entao_dutil/src/collection.dart';
 import 'package:entao_dutil/src/collection_list.dart';
 import 'package:entao_dutil/src/strings.dart';
 
-class IniItem {
-  String key;
-  String value;
-  String section;
-
-  IniItem({required this.key, required this.value, this.section = ""});
-
-  @override
-  String toString() {
-    if (section.isEmpty) return "$key=$value";
-    return "[$section] $key=$value";
-  }
-
-  String toText() {
-    return "$key=$value";
-  }
-}
-
 class ini {
   ini._();
 
-  static List<IniItem>? read({required String file}) {
-    String? s = File(file).readText();
+  static List<IniItem>? read(File file) {
+    String? s = file.readText();
     if (s == null) return null;
-    return fromText(s);
+    return parseText(s);
   }
 
-  static void write({required String file, required List<IniItem> items}) {
+  static void write(File file, List<IniItem> items) {
     String text = toText(items);
-    text.writeToPath(file);
+    file.writeAsStringSync(text);
   }
 
-  static List<IniItem> fromText(String text) {
+  static List<IniItem> parseText(String text) {
     List<IniItem> items = [];
     List<String> lines = text.splitLines();
     String sec = "";
@@ -84,6 +66,24 @@ class ini {
       }
     }
     return text;
+  }
+}
+
+class IniItem {
+  String key;
+  String value;
+  String section;
+
+  IniItem({required this.key, required this.value, this.section = ""});
+
+  @override
+  String toString() {
+    if (section.isEmpty) return "$key=$value";
+    return "[$section] $key=$value";
+  }
+
+  String toText() {
+    return "$key=$value";
   }
 }
 
