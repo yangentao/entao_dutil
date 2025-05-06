@@ -21,6 +21,16 @@ class Hex {
 }
 
 extension IntHexExt on int {
+  /// [start, end]
+  bool between(int start, int end) {
+    return this >= start && this <= end;
+  }
+
+  /// [start, end)
+  bool in_(int start, int end) {
+    return this >= start && this < end;
+  }
+
   //[start, end)
   int limitOpen(int start, int end) {
     if (this < start) return start;

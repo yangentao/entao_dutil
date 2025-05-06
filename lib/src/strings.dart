@@ -229,6 +229,10 @@ extension StringExtension on String {
     if (length < n) return this;
     return substring(length - n);
   }
+  String skip({required int head, int tail = 0}){
+    if(head + tail  >= length) return "";
+    return substring(head, length - tail);
+  }
 
   String substringBefore(String s, [String? miss]) {
     int n = indexOf(s);
