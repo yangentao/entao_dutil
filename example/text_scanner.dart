@@ -37,7 +37,7 @@ void test12() {
 void main() {
   String text = """abcd,def""";
   TextScanner ts = TextScanner(text);
- print(ts.expectAnyString(["abc", "ff", "de"]) );
+  print(ts.expectAnyString(["tt", "ff", "de"]));
   ts.printLastBuf();
   println(ts.position);
 }
@@ -106,31 +106,36 @@ class TextScanner {
     return moveNext(terminator: (e) => chars.contains(e));
   }
 
+  /// 最多吃掉一个
   List<int> expectChar(int ch) {
     return moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
   }
 
+  /// 吃掉所有chars中包含的字符
   List<int> expectAnyChar(List<int> chars) {
     assert(chars.isNotEmpty);
     return moveNext(acceptor: (e) => chars.contains(e));
   }
 
+  /// 匹配失败, 会回退位置
   bool expectString(String s) {
     assert(s.isNotEmpty);
+    ScanPos tp = savePosition();
     List<int> cs = s.codeUnits;
     List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
-    return ls.length == cs.length;
+    bool ok = ls.length == cs.length;
+    if (!ok) tp.restore();
+    return ok;
   }
 
+  /// 长度优先
+  /// 匹配失败, 会回退位置
   bool expectAnyString(List<String> slist) {
     assert(slist.isNotEmpty);
     List<String> ls = slist.sortedProp((e) => e.length, desc: true);
-    ScanPos tp = savePosition();
     for (String s in ls) {
-      tp.restore();
       if (expectString(s)) return true;
     }
-    tp.restore();
     return false;
   }
 
