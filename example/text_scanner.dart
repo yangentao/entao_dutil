@@ -1,7 +1,7 @@
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_dutil/src/char_code.dart';
 
-void main() {
+void test12() {
   String text = """
   {
   name:"entao",
@@ -27,15 +27,33 @@ void main() {
   ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
   ts.skip();
   ts.printLastBuf();
-  ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA,CharCode.SEMI]);
+  ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA, CharCode.SEMI]);
   ts.skipSpaceTabCrLf();
 
   ts.expectString("male");
   ts.printLastBuf();
+}
 
+void main() {
+  String text = """abcd,def""";
+  TextScanner ts = TextScanner(text);
+ print(ts.expectAnyString(["abc", "ff", "de"]) );
+  ts.printLastBuf();
+  println(ts.position);
 }
 
 typedef CharPredicator = bool Function(int);
+
+class ScanPos {
+  final TextScanner _scanner;
+  final int _pos;
+
+  ScanPos(this._scanner, this._pos);
+
+  void restore() {
+    _scanner.position = _pos;
+  }
+}
 
 class TextScanner {
   final String text;
@@ -55,7 +73,11 @@ class TextScanner {
 
   String get lastBufString => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
 
-  void printLastBuf(){
+  ScanPos savePosition() {
+    return ScanPos(this, position);
+  }
+
+  void printLastBuf() {
     print(lastBufString);
   }
 
@@ -88,15 +110,28 @@ class TextScanner {
     return moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
   }
 
-  List<int> expectAny(List<int> chars) {
+  List<int> expectAnyChar(List<int> chars) {
     assert(chars.isNotEmpty);
     return moveNext(acceptor: (e) => chars.contains(e));
   }
 
-  List<int> expectString(String s) {
+  bool expectString(String s) {
     assert(s.isNotEmpty);
     List<int> cs = s.codeUnits;
-    return moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
+    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
+    return ls.length == cs.length;
+  }
+
+  bool expectAnyString(List<String> slist) {
+    assert(slist.isNotEmpty);
+    List<String> ls = slist.sortedProp((e) => e.length, desc: true);
+    ScanPos tp = savePosition();
+    for (String s in ls) {
+      tp.restore();
+      if (expectString(s)) return true;
+    }
+    tp.restore();
+    return false;
   }
 
   List<int> expectIdent() {

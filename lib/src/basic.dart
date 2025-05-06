@@ -53,6 +53,12 @@ extension LetBlock<T> on T {
   }
 }
 
+class PairVar<A, B>{
+  A first;
+  B second;
+  PairVar(this.first, this.second);
+}
+
 class OSDetect {
   OSDetect._();
 
