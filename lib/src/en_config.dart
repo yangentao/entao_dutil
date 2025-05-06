@@ -94,9 +94,8 @@ class _EnConfigParser {
           int v = s.toInt ?? _parseError("Expect double value. ");
           return EnInt(v);
         }
-      case CharConst.QUOTE:
-        String s = _parseString();
-        print("parse string: [$s]");
+      case CharConst.QUOTE || CharConst.SQUOTE:
+        String s = _parseString(ch);
         return EnString(s);
       default:
         _parseError("parse error.");
@@ -200,14 +199,14 @@ class _EnConfigParser {
     return buf.toString();
   }
 
-  String _parseString() {
+  String _parseString(int quoteChar) {
     _skipSpTab();
-    _tokenc([CharConst.QUOTE]);
+    _tokenc([quoteChar]);
     StringBuffer buf = StringBuffer();
     bool escing = false;
     while (!_end) {
       if (!escing) {
-        if (_currentChar == CharConst.QUOTE) {
+        if (_currentChar == quoteChar) {
           _skip();
           String s = buf.toString();
           return s;
@@ -449,12 +448,19 @@ class EnString extends EnValue implements Comparable<String> {
 
   @override
   void serializeTo(StringBuffer buf) {
-    return buf.write(data.quoted);
+    buf.writeCharCode(CharConst.QUOTE);
+    for (var ch in data.codeUnits) {
+      if (ch == CharConst.QUOTE) {
+        buf.writeCharCode(CharConst.BACK_SLASH);
+      }
+      buf.writeCharCode(ch);
+    }
+    buf.writeCharCode(CharConst.QUOTE);
   }
 
   @override
   void serializePretty(StringBuffer buf, int ident) {
-    return buf.write(data.quoted);
+    serializeTo(buf);
   }
 
   @override
