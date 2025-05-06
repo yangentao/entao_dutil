@@ -71,14 +71,14 @@ class TextScanner {
 
   int? get preChar => position >= 1 ? codeList[position - 1] : null;
 
-  String get lastBufString => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
+  String get lastMatch => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
 
   ScanPos savePosition() {
     return ScanPos(this, position);
   }
 
   void printLastBuf() {
-    print(lastBufString);
+    print(lastMatch);
   }
 
   void back([int size = 1]) {
