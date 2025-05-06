@@ -16,13 +16,18 @@ void main() {
   """;
   EnMap em = EnConfig.parse(s).asMap!;
   print(em.serialize(pretty: true));
-  print(em.getPathValue(key: "weight").runtimeType);
+  print(em.path("weight").runtimeType);
+  em.setPath("ssl", false);
+  em.setPath("options.0", "GETT");
   test("config", () {
     expect("google.com", em["host"].toString());
     expect("80", em["port"].toString());
-    // expect("[GET, POST, PUT, DELETE]", em["options"].toString());
-    expect("POST", em.getPathValue(key: "options.1").toString());
-    expect("entao", em.getPathValue(key: "user.name").toString());
-    expect("dev", em.getPathValue(key: "user.job").toString());
+    expect(["GETT", "POST", "PUT", "DELETE"], em["options"].listStringValue);
+    expect("POST", em.path("options.1").toString());
+    expect("entao", em.path("user.name").toString());
+    expect("dev", em.path("user.job").toString());
+    expect(false, em.path("ssl").asBool?.data);
   });
+
+  print(em.serialize(pretty: true));
 }

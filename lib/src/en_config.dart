@@ -145,7 +145,7 @@ class _EnConfigParser {
       _tokenc([CharConst.COLON, CharConst.EQUAL]);
       var yv = _parseValue();
       if (allowKeyPath) {
-        yo.setPathValue(value: yv, key: key);
+        yo.setPath(key, yv);
       } else {
         yo.data[key] = yv;
       }
@@ -385,8 +385,16 @@ class EnMap extends EnValue with Iterable<MapEntry<String, EnValue>> {
 class EnList extends EnValue with Iterable<EnValue> {
   List<EnValue> data = [];
 
+  List<bool> get boolList {
+    return data.mapList((e) => e.asBool?.data).nonNullList;
+  }
+
   List<int> get intList {
-    return data.mapList((e) => e.asString?.data.toInt).nonNullList;
+    return data.mapList((e) => e.asInt?.data).nonNullList;
+  }
+
+  List<double> get doubleList {
+    return data.mapList((e) => e.asDouble?.data).nonNullList;
   }
 
   List<String> get stringList {
@@ -556,7 +564,29 @@ abstract class EnValue {
 
   EnString? get asString => this.castTo();
 
+  EnInt? get asInt => this.castTo();
+
+  EnDouble? get asDouble => this.castTo();
+
+  EnBool? get asBool => this.castTo();
+
   bool get isNull => this is EnNull;
+
+  bool? get boolValue => asBool?.data;
+
+  int? get intValue => asInt?.data;
+
+  double? get doubleValue => asDouble?.data;
+
+  String? get stringValue => asString?.data;
+
+  List<bool>? get listBoolValue => asList?.boolList;
+
+  List<int>? get listIntValue => asList?.intList;
+
+  List<double>? get listDoubleValue => asList?.doubleList;
+
+  List<String>? get listStringValue => asList?.stringList;
 
   String serialize({bool pretty = false}) {
     var buf = StringBuffer();
@@ -577,40 +607,31 @@ abstract class EnValue {
     return serialize(pretty: false);
   }
 
-  EnValue getPathValue({List<String>? keys, String? key}) {
-    List<String> paths;
-    if (keys != null) {
-      paths = keys;
-    } else if (key != null) {
-      paths = key.split(".").map((e) => e.trim()).toList();
-    } else {
-      return EnNull.inst;
-    }
-    if (paths.isEmpty) return this;
-
-    if (this is EnMap) {
-      EnMap ymap = this as EnMap;
-      return ymap[paths.first].getPathValue(keys: paths.sublist(1));
-    }
-    if (this is EnList) {
-      EnList yList = this as EnList;
-      return yList[paths.first.toInt!].getPathValue(keys: paths.sublist(1));
-    }
-    return EnNull.inst;
+  EnValue path(String path, {String sep = "."}) {
+    assert(sep.isNotEmpty);
+    return paths(path.split(sep).map((e) => e.trim()).toList());
   }
 
-  bool setPathValue({List<String>? keys, String? key, required EnValue value}) {
-    List<String> paths;
-    if (keys != null) {
-      paths = keys;
-    } else if (key != null) {
-      paths = key.split(".").map((e) => e.trim()).toList();
-    } else {
-      return false;
+  EnValue paths(List<String> path) {
+    if (path.isEmpty) return this;
+    switch (this) {
+      case EnMap ymap:
+        return ymap[path.first].paths(path.sublist(1));
+      case EnList yList:
+        return yList[path.first.toInt!].paths(path.sublist(1));
+      default:
+        return EnNull.inst;
     }
+  }
+
+  bool setPath(String path, Object value, {String sep = "."}) {
+    return setPaths(path.split(sep).map((e) => e.trim()).toList(), value);
+  }
+
+  bool setPaths(List<String> paths, Object value) {
     if (paths.isEmpty) return false;
     if (paths.length == 1) {
-      this[paths.first] = value;
+      this[paths.first] = _toEnValue(value);
       return true;
     }
     EnValue v = this[paths.first];
@@ -619,57 +640,65 @@ abstract class EnValue {
         this[paths.first] = EnMap(); //auto create
       }
     }
-
-    return this[paths.first].setPathValue(value: value, keys: paths.sublist(1));
+    return this[paths.first].setPaths(paths.sublist(1), value);
   }
 
   EnValue operator [](Object key) {
-    if (this is EnMap) {
-      if (key is String) {
-        return (this as EnMap).data[key] ?? EnNull.inst;
-      }
-    }
-    if (this is EnList) {
-      if (key is int) {
-        return (this as EnList).data[key];
-      }
+    switch (this) {
+      case EnMap em:
+        return em.data[key.toString()] ?? EnNull.inst;
+      case EnList el:
+        if (key is int) {
+          return el.data[key];
+        } else if (key is String) {
+          int? idx = key.toInt;
+          if (idx != null) {
+            return el.data[idx];
+          }
+        }
     }
     return EnNull.inst;
   }
 
   void operator []=(Object key, Object? value) {
-    if (this is EnMap) {
-      if (key is String) {
-        EnMap map = this as EnMap;
+    switch (this) {
+      case EnMap em:
+        String kk = key.toString();
         if (value == null) {
-          map.data.remove(key);
-        } else if (value is String) {
-          map.data[key] = EnString(value);
-        } else if (value is EnValue) {
-          map.data[key] = value;
+          em.data.remove(kk);
         } else {
-          throw Exception("Unknown type: $value");
+          em.data[kk] = _toEnValue(value);
         }
-        return;
-      }
-    }
-    if (this is EnList) {
-      int? idx = key is int ? key : (key is String ? key.toInt : null);
-      if (idx != null) {
-        EnList list = this as EnList;
+      case EnList el:
+        int? idx = key is int ? key : (key is String ? key.toInt : null);
+        if (idx == null) error("index error: $key");
         if (value == null) {
-          list.data[idx] = EnNull.inst;
-        } else if (value is String) {
-          list.data[idx] = EnString(value);
-        } else if (value is EnValue) {
-          list.data[idx] = value;
+          el.data[idx] = EnNull.inst;
         } else {
-          throw Exception("Unknown type: $value");
+          el.data[idx] = _toEnValue(value);
         }
-        return;
-      }
+
+      default:
+        throw Exception("Unknown type: $value");
     }
-    throw Exception("Unknown type: $value");
+  }
+
+  EnValue _toEnValue(Object value) {
+    switch (value) {
+      case EnValue ev:
+        return ev;
+      case bool b:
+        return EnBool(b);
+      case int n:
+        return EnInt(n);
+      case double f:
+        return EnDouble(f);
+      case String s:
+        return EnString(s);
+
+      default:
+        throw Exception("Unknown type: $value");
+    }
   }
 }
 
