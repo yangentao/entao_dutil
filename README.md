@@ -60,7 +60,7 @@ weight: 90.0
 ```
 OR
 ```
-"""{host:"g.com""; port:80}"""
+"""{host:"g.com"; port:80}"""
 ```
 OR
 ```
