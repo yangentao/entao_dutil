@@ -7,6 +7,7 @@ import 'strings.dart';
 class EnConfig {
   EnConfig._();
 
+  //map or list
   static EnValue? tryParse(String text, {bool allowKeyPath = true}) {
     try {
       var v = parse(text, allowKeyPath: allowKeyPath);
@@ -16,6 +17,7 @@ class EnConfig {
     }
   }
 
+  //map or list
   static EnValue parse(String text, {bool allowKeyPath = true}) {
     _EnConfigParser p = _EnConfigParser(text, allowKeyPath: allowKeyPath);
     return p.parse();
@@ -30,9 +32,6 @@ extension StrignEnExt on String {
   String get enEscaped => _enEscape(this);
 }
 
-const int _SHARP = 0x23; // #
-const int _SL = 0x5C; // \
-
 class _EnConfigParser {
   final bool allowKeyPath;
   final List<int> data;
@@ -42,7 +41,7 @@ class _EnConfigParser {
 
   bool get _end {
     if (_current >= data.length) return true;
-    if (data[_current] == _SHARP && _SL != _preChar) {
+    if (data[_current] == CharConst.SHARP && CharConst.BACK_SLASH != _preChar) {
       while (_current < data.length && !data[_current].isCRLF) {
         _current += 1;
       }
@@ -64,29 +63,54 @@ class _EnConfigParser {
   EnValue parse() {
     int ch = _firstChar();
     if (ch == 0) return EnNull.inst;
-    if (ch == _LBRACKET) return parseArray();
-    return parseObject(isRoot: ch != _LCUB);
+    if (ch == CharConst.L_BRACKET) return parseArray();
+    return parseObject(isRoot: ch != CharConst.L_BRACE);
   }
 
   EnValue _parseValue() {
     _skipSpTab();
     if (_end) return EnNull.inst;
     int ch = _currentChar;
-    if (ch == _LCUB) return parseObject();
-    if (ch == _LBRACKET) return parseArray();
-    String s = _parseString(isKey: false);
-    if (s.isEmpty) return EnNull.inst;
-    return EnString(s);
+    switch (ch) {
+      case CharConst.L_BRACE:
+        return parseObject();
+      case CharConst.L_BRACKET:
+        return parseArray();
+      case CharConst.t:
+        String s = _parseIdent().toLowerCase();
+        if (s == "true") return EnBool(true);
+        if (s == "false") return EnBool(false);
+        _parseError("Except true or false. ");
+      case CharConst.n:
+        String s = _parseIdent().toLowerCase();
+        if (s == "null") return EnNull.inst;
+        _parseError("Except null.  ");
+      case >= CharConst.NUM0 && <= CharConst.NUM9:
+        String s = _parseNum();
+        if (s.contains(".")) {
+          double v = s.toDouble ?? _parseError("Expect double value. ");
+          return EnDouble(v);
+        } else {
+          int v = s.toInt ?? _parseError("Expect double value. ");
+          return EnInt(v);
+        }
+      case CharConst.QUOTE:
+        String s = _parseString();
+        print("parse string: [$s]");
+        return EnString(s);
+      default:
+        _parseError("parse error.");
+    }
   }
 
   EnValue parseArray() {
     _skipSpTab();
-    _tokenc([_LBRACKET]);
+    _tokenc([CharConst.L_BRACKET]);
     _skipSpTabCrLf();
     EnList ya = EnList();
     while (!_end) {
       _skipSpTabCrLf();
-      if (_currentChar == _RBRACKET) break;
+      if (_currentChar == CharConst.R_BRACKET) break;
       var v = _parseValue();
       ya.data.add(v);
       if (_SEPS.contains(_currentChar)) {
@@ -94,21 +118,21 @@ class _EnConfigParser {
         continue;
       }
     }
-    _tokenc([_RBRACKET]);
+    _tokenc([CharConst.R_BRACKET]);
     return ya;
   }
 
   EnMap parseObject({bool isRoot = false}) {
     _skipSpTab();
     if (!isRoot) {
-      _tokenc([_LCUB]);
+      _tokenc([CharConst.L_BRACE]);
       _skipSpTabCrLf();
     }
     EnMap yo = EnMap();
     while (!_end) {
       _skipSpTab();
       if (_end) break;
-      if (_currentChar == _RCUB) {
+      if (_currentChar == CharConst.R_BRACE) {
         _skipSpTabCrLf();
         break;
       }
@@ -116,9 +140,9 @@ class _EnConfigParser {
         _next();
         continue;
       }
-      String key = _parseString(isKey: true);
-      if (key.isEmpty) _err("Key is empty.");
-      _tokenc([_COLON, _EQUAL]);
+      String key = _parseIdent();
+      if (key.isEmpty) _parseError("Key is empty.");
+      _tokenc([CharConst.COLON, CharConst.EQUAL]);
       var yv = _parseValue();
       if (allowKeyPath) {
         yo.setPathValue(value: yv, key: key);
@@ -126,74 +150,122 @@ class _EnConfigParser {
         yo.data[key] = yv;
       }
     }
-    if (!isRoot) _tokenc([_RCUB]);
+    if (!isRoot) _tokenc([CharConst.R_BRACE]);
     _skipSpTabCrLf();
     return yo;
   }
 
-  String _parseString({required bool isKey}) {
+  String _parseNum() {
     _skipSpTab();
+    StringBuffer buf = StringBuffer();
+    while (!_end) {
+      int ch = _currentChar;
+      switch (ch) {
+        case >= CharConst.NUM0 && <= CharConst.NUM9:
+          buf.writeCharCode(ch);
+          _next();
+        case CharConst.DOT:
+          buf.writeCharCode(ch);
+          _next();
+        default:
+          if (buf.isEmpty) _parseError("Expect ident.");
+          return buf.toString();
+      }
+    }
+    if (buf.isEmpty) _parseError("Expect ident.");
+    return buf.toString();
+  }
+
+  String _parseIdent() {
+    _skipSpTab();
+    StringBuffer buf = StringBuffer();
+    while (!_end) {
+      int ch = _currentChar;
+      switch (ch) {
+        case >= CharConst.A && <= CharConst.Z:
+          buf.writeCharCode(ch);
+          _next();
+        case >= CharConst.a && <= CharConst.z:
+          buf.writeCharCode(ch);
+          _next();
+        case CharConst.UNDLN:
+          buf.writeCharCode(ch);
+          _next();
+        default:
+          if (buf.isEmpty) _parseError("Expect ident.");
+          return buf.toString();
+      }
+    }
+    if (buf.isEmpty) _parseError("Expect ident.");
+    return buf.toString();
+  }
+
+  String _parseString() {
+    _skipSpTab();
+    _tokenc([CharConst.QUOTE]);
     StringBuffer buf = StringBuffer();
     bool escing = false;
     while (!_end) {
-      int ch = _currentChar;
       if (!escing) {
-        if (isKey) {
-          if (_END_KEY.contains(ch)) break;
-        } else {
-          if (_END_VALUE.contains(ch)) break;
+        if (_currentChar == CharConst.QUOTE) {
+          _skip();
+          String s = buf.toString();
+          return s;
         }
-        if (ch.isCRLF) break;
-        _next();
-        if (ch == _BSLASH) {
+        if (_currentChar == CharConst.BACK_SLASH) {
           escing = true;
-          continue;
+        } else {
+          buf.writeCharCode(_currentChar);
         }
-        buf.writeCharCode(ch);
-      } else {
-        escing = false;
         _next();
-        switch (ch.charCodeString) {
-          case '/':
-            buf.writeCharCode(ch);
-            break;
-          case 'b':
-            buf.write("\b");
-            break;
-          case "f":
-            buf.writeCharCode(_FF);
-            break;
-          case 'n':
-            buf.writeCharCode(_LF);
-            break;
-          case 'r':
-            buf.writeCharCode(_CR);
-            break;
-          case 't':
-            buf.writeCharCode(_TAB);
-            break;
-          case 'u':
-          case 'U':
-            if (_current + 4 < data.length && data[_current + 0].isHex && data[_current + 1].isHex && data[_current + 2].isHex && data[_current + 3].isHex) {
-              String s = String.fromCharCodes(data.sublist(_current, _current + 4));
-              int? nval = int.tryParse(s, radix: 16);
-              if (nval == null) {
-                _err("parse unicode failed.");
-              } else {
-                buf.write(nval.charCodeString); //TODO Runes
-              }
-            } else {
-              _err("expect unicode char.");
-            }
-            break;
-          default:
-            buf.writeCharCode(ch);
-            break;
-        }
+        continue;
       }
+
+      escing = false;
+
+      int ch = _currentChar;
+      switch (ch) {
+        case CharConst.SLASH:
+          buf.writeCharCode(ch);
+        case CharConst.b:
+          buf.write(CharConst.BS);
+        case CharConst.f:
+          buf.writeCharCode(CharConst.FF);
+        case CharConst.n:
+          buf.writeCharCode(CharConst.LF);
+        case CharConst.r:
+          buf.writeCharCode(CharConst.CR);
+        case CharConst.t:
+          buf.writeCharCode(CharConst.TAB);
+        case CharConst.u:
+        case CharConst.U:
+          _skip();
+          if (!_end && _currentChar == CharConst.PLUS) {
+            _skip();
+          }
+          ListInt sb = [];
+          while (!_end && _currentChar.isHex) {
+            sb.add(_currentChar);
+            _next();
+          }
+          if (sb.isEmpty) {
+            _parseError("parse unicode failed.");
+          }
+          String s = String.fromCharCodes(sb);
+          int? nval = int.tryParse(s, radix: 16);
+          if (nval == null) {
+            _parseError("parse unicode failed.");
+          } else {
+            _current -= 1;
+            buf.write(nval.charCodeString);
+          }
+        default:
+          buf.writeCharCode(ch);
+      }
+      _next();
     }
     if (escing) {
-      _err("解析错误,转义.");
+      _parseError("解析错误,转义.");
     }
     return buf.toString().trim();
   }
@@ -201,17 +273,31 @@ class _EnConfigParser {
   void _tokenc(List<int> cs) {
     _skipSpTab();
     if (_end) {
-      _err("Expect ${cs.map((e) => e.charCodeString)}, but text is end.");
+      _parseError("Expect ${cs.map((e) => e.charCodeString)}, but text is end.");
     }
     if (!cs.contains(_currentChar)) {
-      _err("Expect char:${cs.map((e) => e.charCodeString)}");
+      _parseError("Expect char:${cs.map((e) => e.charCodeString)}");
     }
     _next();
     _skipSpTab();
   }
 
+  void _tokens(String tk) {
+    _skipSpTab();
+    for (int ch in tk.codeUnits) {
+      if (_end || _currentChar != ch) {
+        _parseError("Expect $tk.");
+      }
+      _next();
+    }
+  }
+
   void _next() {
     _current += 1;
+  }
+
+  void _skip([int size = 1]) {
+    _current += size;
   }
 
   void _skipSpTabCrLf() {
@@ -234,8 +320,8 @@ class _EnConfigParser {
     }
   }
 
-  Never _err([String msg = "YConfigParser Error"]) {
-    if (!_end) throw Exception("$msg: position: $_current, char: ${String.fromCharCode(_currentChar)}, left:$_leftString");
+  Never _parseError([String msg = "YConfigParser Error"]) {
+    if (!_end) throw Exception("$msg: position: $_current, char: ${String.fromCharCode(_currentChar)}, left text:$_leftString");
     throw Exception(msg);
   }
 
@@ -258,84 +344,41 @@ class EnMap extends EnValue with Iterable<MapEntry<String, EnValue>> {
   @override
   Iterator<MapEntry<String, EnValue>> get iterator => data.entries.iterator;
 
-  String serialize({bool pretty = false}) {
-    var buf = StringBuffer();
-    if (pretty) {
-      _serializePretty(buf, this, 0);
-    } else {
-      _serializeTo(buf, this);
-    }
-    return buf.toString();
-  }
-
-  void _serializeTo(StringBuffer buf, EnValue value) {
-    if (value is EnNull) return;
-    if (value is EnString) {
-      buf.write(value.data);
-      return;
-    }
-    if (value is EnList) {
-      buf.write("[");
-      bool first = true;
-      for (var e in value.data) {
-        if (!first) buf.write(",");
-        _serializeTo(buf, e);
-        first = false;
-      }
-      buf.write("]");
-      return;
-    }
-    if (value is EnMap) {
-      buf.write("{");
-      bool first = true;
-      for (var e in value.data.entries) {
-        if (!first) buf.write(",");
-        buf.write(e.key);
-        buf.write(":");
-        _serializeTo(buf, e.value);
-        first = false;
-      }
-      buf.write("}");
-    }
-  }
-
-  void _serializePretty(StringBuffer buf, EnValue value, int ident) {
-    if (value is EnNull) return;
-    if (value is EnString) {
-      buf.write(value.data);
-      return;
-    }
-    if (value is EnList) {
-      buf.writeCharCode(_LBRACKET);
-      bool first = true;
-      for (var e in value.data) {
-        if (!first) buf.write(", ");
-        _serializePretty(buf, e, ident + 1);
-        first = false;
-      }
-      buf.writeCharCode(_RBRACKET);
-      return;
-    }
-    if (value is EnMap) {
-      buf.writeCharCode(_LCUB);
-      if (value.data.isNotEmpty) buf.writeCharCode(_LF);
-      var ls = value.data.entries.toList();
-      for (var e in ls) {
-        buf.space(ident + 1).write(e.key);
-        buf.write(":");
-        _serializePretty(buf, e.value, ident + 1);
-        buf.writeCharCode(_LF);
-      }
-      if (value.data.isNotEmpty) {
-        buf.space(ident);
-      }
-      buf.writeCharCode(_RCUB);
-    }
+  @override
+  String toString() {
+    return serialize(pretty: false);
   }
 
   @override
-  String toString() {
-    return data.toString();
+  void serializeTo(StringBuffer buf) {
+    buf.write("{");
+    bool first = true;
+    for (var e in data.entries) {
+      if (!first) buf.write(", ");
+      first = false;
+      buf.write(e.key);
+      buf.write(":");
+      e.value.serializeTo(buf);
+    }
+    buf.write("}");
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    buf.write("{");
+    if (data.isEmpty) {
+      buf.write("}");
+      return;
+    }
+    buf.writeCharCode(CharConst.LF);
+    for (var e in data.entries) {
+      buf.space(ident + 1).write(e.key);
+      buf.write(":");
+      e.value.serializePretty(buf, ident + 1);
+      buf.writeCharCode(CharConst.LF);
+    }
+    buf.space(ident);
+    buf.write("}");
   }
 }
 
@@ -351,12 +394,39 @@ class EnList extends EnValue with Iterable<EnValue> {
   }
 
   @override
+  Iterator<EnValue> get iterator => data.iterator;
+
+  @override
   String toString() {
-    return data.toString();
+    return serialize(pretty: false);
   }
 
   @override
-  Iterator<EnValue> get iterator => data.iterator;
+  void serializeTo(StringBuffer buf) {
+    buf.writeCharCode(CharConst.L_BRACKET);
+    bool first = true;
+    for (var e in data) {
+      if (!first) buf.write(", ");
+      first = false;
+      e.serializeTo(buf);
+    }
+    buf.writeCharCode(CharConst.R_BRACKET);
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    buf.writeCharCode(CharConst.L_BRACKET);
+    bool needIdent = data.firstOrNull is EnList || data.firstOrNull is EnMap;
+    bool first = true;
+    for (var e in data) {
+      if (!first) buf.write(", ");
+      first = false;
+      if (needIdent) buf.space(ident);
+      e.serializePretty(buf, ident + 1);
+    }
+    if (needIdent) buf.space(ident);
+    buf.writeCharCode(CharConst.R_BRACKET);
+  }
 }
 
 class EnString extends EnValue implements Comparable<String> {
@@ -370,8 +440,91 @@ class EnString extends EnValue implements Comparable<String> {
   }
 
   @override
+  void serializeTo(StringBuffer buf) {
+    return buf.write(data.quoted);
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    return buf.write(data.quoted);
+  }
+
+  @override
   int compareTo(String other) {
     return data.compareTo(other);
+  }
+}
+
+class EnInt extends EnValue implements Comparable<int> {
+  int data;
+
+  EnInt(this.data);
+
+  @override
+  String toString() {
+    return data.toString();
+  }
+
+  @override
+  void serializeTo(StringBuffer buf) {
+    return buf.write(data.toString());
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    return buf.write(data.toString());
+  }
+
+  @override
+  int compareTo(int other) {
+    return data.compareTo(other);
+  }
+}
+
+class EnDouble extends EnValue implements Comparable<double> {
+  double data;
+
+  EnDouble(this.data);
+
+  @override
+  String toString() {
+    return data.toString();
+  }
+
+  @override
+  void serializeTo(StringBuffer buf) {
+    return buf.write(data.toString());
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    return buf.write(data.toString());
+  }
+
+  @override
+  int compareTo(double other) {
+    return data.compareTo(other);
+  }
+}
+
+class EnBool extends EnValue {
+  bool data;
+
+  EnBool(this.data);
+
+  @override
+  String toString() {
+    return data.toString();
+  }
+
+  @override
+  void serializeTo(StringBuffer buf) {
+    return buf.write(data.toString());
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    return buf.write(data.toString());
   }
 }
 
@@ -381,6 +534,16 @@ class EnNull extends EnValue {
   @override
   String toString() {
     return "null";
+  }
+
+  @override
+  void serializeTo(StringBuffer buf) {
+    return buf.write("null");
+  }
+
+  @override
+  void serializePretty(StringBuffer buf, int ident) {
+    return buf.write("null");
   }
 
   static EnNull inst = EnNull._();
@@ -395,9 +558,23 @@ abstract class EnValue {
 
   bool get isNull => this is EnNull;
 
+  String serialize({bool pretty = false}) {
+    var buf = StringBuffer();
+    if (pretty) {
+      serializePretty(buf, 0);
+    } else {
+      serializeTo(buf);
+    }
+    return buf.toString();
+  }
+
+  void serializeTo(StringBuffer buf);
+
+  void serializePretty(StringBuffer buf, int ident);
+
   @override
   String toString() {
-    return "null";
+    return serialize(pretty: false);
   }
 
   EnValue getPathValue({List<String>? keys, String? key}) {
@@ -515,37 +692,64 @@ String _enEscape(String s) {
   for (int i = 0; i < codes.length; ++i) {
     int c = codes[i];
     if (_ESCAPES.contains(c)) {
-      sb.writeCharCode(_BSLASH);
+      sb.writeCharCode(CharConst.BACK_SLASH);
     }
     sb.writeCharCode(c);
   }
   return sb.toString();
 }
 
-const int _FF = 12; // "="
-const int _EQUAL = 61; // "="
-const int _COLON = 58; // :
-const int _SEM = 59; // ;
-const int _COMMA = 44; // ,
-const int _CR = 13; // \r
-const int _LF = 10; // \n
-const int _SP = 32; // space
-const int _TAB = 9; // tab
-// ignore: unused_element
-const int _DOT = 46; // .
-const int _BSLASH = 92; // \
-const int _LBRACKET = 91; // [
-const int _RBRACKET = 93; // ]
-const int _LCUB = 123; // {
-const int _RCUB = 125; // }
+class CharConst {
+  CharConst._();
 
-const Set<int> _WHITES = {_CR, _LF, _SP, _TAB};
-const Set<int> _BRACKETS = {_LCUB, _RCUB, _LBRACKET, _RBRACKET};
-const Set<int> _ASSIGNS = {_COLON, _EQUAL};
-const Set<int> _SEPS = {_CR, _LF, _SEM, _COMMA};
+  static const int BS = 8; // backspace \b
+  static const int TAB = 9; // tab  \t
+  static const int LF = 10; // \n
+  static const int FF = 12; // "="
+  static const int CR = 13; // \r
+  static const int ESC = 27; // escape
+  static const int SP = 32; // space
+  static const int QUOTE = 34; // "
+  static const int SHARP = 35; // # '  '
+  static const int SQUOTE = 39; // '
+  static const int L_PARENTHESIS = 40; // (
+  static const int R_PARENTHESIS = 41; // )
+  static const int PLUS = 43; // +
+  static const int COMMA = 44; // ,
+  static const int DOT = 46; // .
+  static const int SLASH = 47; // /
+  static const int NUM0 = 48; // 0
+  static const int NUM9 = 57; // 9
+  static const int COLON = 58; // :
+  static const int SEMICOLON = 59; // ;
+  static const int EQUAL = 61; // =
+  static const int A = 65; // A
+  static const int U = 85; // U
+  static const int Z = 90; // Z
+  static const int L_BRACKET = 91; // [
+  static const int BACK_SLASH = 92; // \  0x5c
+  static const int R_BRACKET = 93; // ]
+  static const int UNDLN = 95; // _
+  static const int a = 97; // a
+  static const int b = 98; // b
+  static const int n = 110; // n
+  static const int r = 114; // r
+  static const int u = 117; // u
+  static const int f = 102; // f
+  static const int t = 116; // t
+  static const int z = 122; // z
+  static const int L_BRACE = 123; // {
+  static const int R_BRACE = 125; // }
+  static const int DEL = 127; // DEL
+}
+
+const Set<int> _WHITES = {CharConst.CR, CharConst.LF, CharConst.SP, CharConst.TAB};
+const Set<int> _BRACKETS = {CharConst.L_BRACE, CharConst.R_BRACE, CharConst.L_BRACKET, CharConst.R_BRACKET};
+const Set<int> _ASSIGNS = {CharConst.COLON, CharConst.EQUAL};
+const Set<int> _SEPS = {CharConst.CR, CharConst.LF, CharConst.SEMICOLON, CharConst.COMMA};
 Set<int> _END_VALUE = _SEPS.union(_BRACKETS); //TODO string value 允许出现[]{}
 Set<int> _END_KEY = _END_VALUE.union(_ASSIGNS);
-Set<int> _ESCAPES = _END_KEY.union({_BSLASH});
+Set<int> _ESCAPES = _END_KEY.union({CharConst.BACK_SLASH});
 
 extension _IntHexExt on int {
   bool get isHex {
@@ -554,9 +758,9 @@ extension _IntHexExt on int {
 
   bool get isWhite => _WHITES.contains(this);
 
-  bool get isSpTab => this == _SP || this == _TAB;
+  bool get isSpTab => this == CharConst.SP || this == CharConst.TAB;
 
-  bool get isCRLF => this == _CR || this == _LF;
+  bool get isCRLF => this == CharConst.CR || this == CharConst.LF;
 
   String get charCodeString => String.fromCharCode(this);
 }
@@ -564,7 +768,7 @@ extension _IntHexExt on int {
 extension _StringBufferExt on StringBuffer {
   StringBuffer space(int n) {
     for (int i = 1; i < n * 4; ++i) {
-      writeCharCode(_SP);
+      writeCharCode(CharConst.SP);
     }
     return this;
   }
