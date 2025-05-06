@@ -12,9 +12,27 @@ void main() {
   """;
   TextScanner ts = TextScanner(text);
   ts.skipSpaceTabCrLf();
-  ts.expectAny([CharCode.L_BRACE]);
-  print(ts.lastBufString);
+  ts.expectChar(CharCode.L_BRACE); // {
+  ts.printLastBuf();
   ts.skipSpaceTabCrLf();
+
+  ts.expectIdent(); // name
+  ts.printLastBuf();
+
+  ts.skipSpaceTab();
+  ts.expectChar(CharCode.COLON); // :
+  ts.skipSpaceTab();
+  ts.expectChar(CharCode.QUOTE); // "
+  // ts.skip();
+  ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
+  ts.skip();
+  ts.printLastBuf();
+  ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA,CharCode.SEMI]);
+  ts.skipSpaceTabCrLf();
+
+  ts.expectString("male");
+  ts.printLastBuf();
+
 }
 
 typedef CharPredicator = bool Function(int);
@@ -36,6 +54,10 @@ class TextScanner {
   int? get preChar => position >= 1 ? codeList[position - 1] : null;
 
   String get lastBufString => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
+
+  void printLastBuf(){
+    print(lastBufString);
+  }
 
   void back([int size = 1]) {
     if (position > 0) position -= 1;
@@ -60,6 +82,10 @@ class TextScanner {
   List<int> moveUntil(List<int> chars) {
     assert(chars.isNotEmpty);
     return moveNext(terminator: (e) => chars.contains(e));
+  }
+
+  List<int> expectChar(int ch) {
+    return moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
   }
 
   List<int> expectAny(List<int> chars) {
