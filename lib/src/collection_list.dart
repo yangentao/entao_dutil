@@ -27,9 +27,7 @@ extension ListSliceEx<T> on List<T> {
   T? removeFirst(Predicate<T> p) {
     int idx = this.indexWhere(p);
     if (idx < 0) return null;
-    T item = this[idx];
-    this.removeAt(idx);
-    return item;
+    return this.removeAt(idx);
   }
 
   IntRange get indexes => length.indexes;

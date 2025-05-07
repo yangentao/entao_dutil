@@ -53,9 +53,10 @@ extension LetBlock<T> on T {
   }
 }
 
-class PairVar<A, B>{
+class PairVar<A, B> {
   A first;
   B second;
+
   PairVar(this.first, this.second);
 }
 
@@ -178,6 +179,16 @@ Never error(String? msg) {
 
 Never errorHare(String? msg) {
   throw HareException(msg);
+}
+
+extension PropMapExt<T extends Object> on PropMap {
+  AnyProp<T> propAny(String key, {T? missValue}) {
+    return AnyProp(map: this, key: key, missValue: missValue);
+  }
+
+  SomeProp<T> propSome(String key, {required T missValue}) {
+    return SomeProp(map: this, key: key, missValue: missValue);
+  }
 }
 
 class AnyProp<T extends Object> {
