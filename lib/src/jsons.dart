@@ -5,101 +5,125 @@ import 'text_scanner.dart';
 
 void main() {
   // 1F600
-  String text = """
-  true
-  """;
-  print(JsonParser("true").parseValue());
-  print(JsonParser("false").parseValue());
-  print(JsonParser("null").parseValue());
-  print(JsonParser(""" "hello\\u1F600," """).parseValue());
-  print(JsonParser("1.23").parseValue());
-  print(JsonParser("123").parseValue());
-  print(JsonParser("123e4").parseValue());
-  print(JsonParser("1.23e4").parseValue());
+  print(JsonParser("""["aa", "bb" , "cc" ]""").parse());
+  print(JsonParser(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """).parse());
 }
 
+/// strict = false 时,   键不需要引号,  逗号/分号/回车/换行都可以分割值.
 class JsonParser {
-  String json;
-  TextScanner ts;
+  final TextScanner _ts;
 
-  JsonParser(this.json) : ts = TextScanner(json);
+  JsonParser(String json) : _ts = TextScanner(json);
 
   dynamic parse() {
-    dynamic v = parseValue();
-    ts.skipWhites();
-    if (!ts.isEnd) raise();
+    dynamic v = _parseValue();
+    _ts.skipWhites();
+    if (!_ts.isEnd) _raise();
     return v;
   }
 
-  dynamic parseValue() {
-    if (ts.isEnd) return null;
-    ts.skipWhites();
-    int ch = ts.nowChar;
+  dynamic _parseValue() {
+    if (_ts.isEnd) return null;
+    _ts.skipWhites();
+    int ch = _ts.nowChar;
     switch (ch) {
       case CharCode.LCUB:
-        return parseObject();
+        return _parseObject();
       case CharCode.LSQB:
-        return parseArray();
+        return _parseArray();
       case CharCode.QUOTE:
-        return parseString();
+        return _parseString();
       case CharCode.MINUS:
-        return parseNum();
+        return _parseNum();
       case >= CharCode.NUM0 && <= CharCode.NUM9:
-        return parseNum();
+        return _parseNum();
       case CharCode.n:
-        return parseNull();
+        return _parseNull();
       case CharCode.t:
-        return parseTrue();
+        return _parseTrue();
       case CharCode.f:
-        return parseFalse();
+        return _parseFalse();
       default:
-        raise();
+        _raise();
     }
   }
 
-  JsonMap parseObject() {
-    return {};
+  JsonMap _parseObject() {
+    _ts.skipWhites();
+    JsonMap map = {};
+    _ts.expectChar(CharCode.LCUB);
+    _ts.skipWhites();
+    while (_ts.nowChar != CharCode.RCUB) {
+      _ts.skipWhites();
+      String key = _parseString();
+      _ts.skipWhites();
+      _ts.expectChar(CharCode.COLON);
+      dynamic v = _parseValue();
+      map[key] = v;
+      _ts.skipWhites();
+      if (_ts.nowChar != CharCode.RCUB) {
+        _ts.expectChar(CharCode.COMMA);
+        _ts.skipWhites();
+      }
+    }
+    _ts.expectChar(CharCode.RCUB);
+    return map;
   }
 
-  JsonList parseArray() {
-    return [];
+  JsonList _parseArray() {
+    _ts.skipWhites();
+    JsonList list = [];
+    _ts.expectChar(CharCode.LSQB);
+    _ts.skipWhites();
+    while (_ts.nowChar != CharCode.RSQB) {
+      _ts.skipWhites();
+      dynamic v = _parseValue();
+      list.add(v);
+      _ts.skipWhites();
+      if (_ts.nowChar != CharCode.RSQB) {
+        _ts.expectChar(CharCode.COMMA);
+        _ts.skipWhites();
+      }
+    }
+    _ts.expectChar(CharCode.RSQB);
+    return list;
   }
 
-  num parseNum() {
-    List<int> buf = ts.moveNext(acceptor: (e) => isNum(e));
+  num _parseNum() {
+    List<int> buf = _ts.moveNext(acceptor: (e) => _isNum(e));
     String s = String.fromCharCodes(buf);
     num n = num.parse(s);
     return n;
   }
 
-  String? parseString() {
-    ts.expectChar(CharCode.QUOTE);
-    List<int> charList = ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
-    String s = codesToString(charList);
-    ts.expectChar(CharCode.QUOTE);
+  String _parseString() {
+    _ts.expectChar(CharCode.QUOTE);
+    List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
+    String s = _codesToString(charList);
+    _ts.expectChar(CharCode.QUOTE);
     return s;
   }
 
-  dynamic parseNull() {
-    ts.expectString("null");
+  dynamic _parseNull() {
+    _ts.expectString("null");
     return null;
   }
 
-  bool parseTrue() {
-    ts.expectString("true");
+  bool _parseTrue() {
+    _ts.expectString("true");
     return true;
   }
 
-  bool parseFalse() {
-    ts.expectString("false");
+  bool _parseFalse() {
+    _ts.expectString("false");
     return false;
   }
 
-  Never raise([String msg = "Parse Error"]) {
-    throw Exception("$msg. ${ts.position}, ${ts.leftText}");
+  Never _raise([String msg = "Parse Error"]) {
+    throw Exception("$msg. ${_ts.position}, ${_ts.leftText}");
   }
 
-  static String codesToString(List<int> charList) {
+  static String _codesToString(List<int> charList) {
     List<int> buf = [];
     bool escaping = false;
     int i = 0;
@@ -150,7 +174,7 @@ class JsonParser {
     return String.fromCharCodes(buf);
   }
 
-  static bool isNum(int ch) {
+  static bool _isNum(int ch) {
     if (ch >= CharCode.NUM0 && ch <= CharCode.NUM9) return true;
     return ch == CharCode.DOT || ch == CharCode.MINUS || ch == CharCode.PLUS || ch == CharCode.e || ch == CharCode.E;
   }

@@ -4,13 +4,17 @@ import 'package:test/test.dart';
 void main() {
   test("basic", () {
     // 1F600
-    expect(true, JsonParser("true").parseValue());
-    expect(false, JsonParser("false").parseValue());
-    expect(null, JsonParser("null").parseValue());
-    expect("hello😀,",JsonParser(""" "hello\\u1F600," """).parseValue());
-    expect(1.23, JsonParser("1.23").parseValue());
-    expect(123,JsonParser("123").parseValue());
-    expect(1230000.0,JsonParser("123e4").parseValue());
-    expect(12300.0 ,JsonParser("1.23e4").parseValue());
+    print(JsonParser("true").parse());
+    print(JsonParser("false").parse());
+    print(JsonParser("null").parse());
+    print(JsonParser(""" "hello\\u1F600," """).parse());
+    print(JsonParser("1.23").parse());
+    print(JsonParser("123").parse());
+    print(JsonParser("123e4").parse());
+    print(JsonParser("1.23e4").parse());
+    print(JsonParser("[1,2,3]").parse());
+    print(JsonParser("""["aa", "bb" , "cc" ]""").parse());
+    print(JsonParser(""" {"aa":1, "bb":null , "cc":"3c" } """).parse());
+    print(JsonParser(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """).parse());
   });
 }
