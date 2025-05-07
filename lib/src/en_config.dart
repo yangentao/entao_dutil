@@ -64,8 +64,8 @@ class _EnConfigParser {
   EnValue parse() {
     int ch = _firstChar();
     if (ch == 0) return EnNull.inst;
-    if (ch == CharCode.LBRACKET) return parseArray();
-    return parseObject(isRoot: ch != CharCode.L_BRACE);
+    if (ch == CharCode.LSQB) return parseArray();
+    return parseObject(isRoot: ch != CharCode.LCUB);
   }
 
   EnValue _parseValue() {
@@ -73,9 +73,9 @@ class _EnConfigParser {
     if (_end) return EnNull.inst;
     int ch = _currentChar;
     switch (ch) {
-      case CharCode.L_BRACE:
+      case CharCode.LCUB:
         return parseObject();
-      case CharCode.LBRACKET:
+      case CharCode.LSQB:
         return parseArray();
       case CharCode.t:
         String s = _parseIdent().toLowerCase();
@@ -105,12 +105,12 @@ class _EnConfigParser {
 
   EnValue parseArray() {
     _skipSpTab();
-    _tokenc([CharCode.LBRACKET]);
+    _tokenc([CharCode.LSQB]);
     _skipSpTabCrLf();
     EnList ya = EnList();
     while (!_end) {
       _skipSpTabCrLf();
-      if (_currentChar == CharCode.RBRACKET) break;
+      if (_currentChar == CharCode.RSQB) break;
       var v = _parseValue();
       ya.data.add(v);
       if (_SEPS.contains(_currentChar)) {
@@ -118,21 +118,21 @@ class _EnConfigParser {
         continue;
       }
     }
-    _tokenc([CharCode.RBRACKET]);
+    _tokenc([CharCode.RSQB]);
     return ya;
   }
 
   EnMap parseObject({bool isRoot = false}) {
     _skipSpTab();
     if (!isRoot) {
-      _tokenc([CharCode.L_BRACE]);
+      _tokenc([CharCode.LCUB]);
       _skipSpTabCrLf();
     }
     EnMap yo = EnMap();
     while (!_end) {
       _skipSpTab();
       if (_end) break;
-      if (_currentChar == CharCode.R_BRACE) {
+      if (_currentChar == CharCode.RCUB) {
         _skipSpTabCrLf();
         break;
       }
@@ -150,7 +150,7 @@ class _EnConfigParser {
         yo.data[key] = yv;
       }
     }
-    if (!isRoot) _tokenc([CharCode.R_BRACE]);
+    if (!isRoot) _tokenc([CharCode.RCUB]);
     _skipSpTabCrLf();
     return yo;
   }
@@ -411,19 +411,19 @@ class EnList extends EnValue with Iterable<EnValue> {
 
   @override
   void serializeTo(StringBuffer buf) {
-    buf.writeCharCode(CharCode.LBRACKET);
+    buf.writeCharCode(CharCode.LSQB);
     bool first = true;
     for (var e in data) {
       if (!first) buf.write(", ");
       first = false;
       e.serializeTo(buf);
     }
-    buf.writeCharCode(CharCode.RBRACKET);
+    buf.writeCharCode(CharCode.RSQB);
   }
 
   @override
   void serializePretty(StringBuffer buf, int ident) {
-    buf.writeCharCode(CharCode.LBRACKET);
+    buf.writeCharCode(CharCode.LSQB);
     bool needIdent = data.firstOrNull is EnList || data.firstOrNull is EnMap;
     bool first = true;
     for (var e in data) {
@@ -433,7 +433,7 @@ class EnList extends EnValue with Iterable<EnValue> {
       e.serializePretty(buf, ident + 1);
     }
     if (needIdent) buf.space(ident);
-    buf.writeCharCode(CharCode.RBRACKET);
+    buf.writeCharCode(CharCode.RSQB);
   }
 }
 
@@ -736,7 +736,7 @@ String _enEscape(String s) {
 }
 
 const Set<int> _WHITES = {CharCode.CR, CharCode.LF, CharCode.SP, CharCode.HTAB};
-const Set<int> _BRACKETS = {CharCode.L_BRACE, CharCode.R_BRACE, CharCode.LBRACKET, CharCode.RBRACKET};
+const Set<int> _BRACKETS = {CharCode.LCUB, CharCode.RCUB, CharCode.LSQB, CharCode.RSQB};
 const Set<int> _ASSIGNS = {CharCode.COLON, CharCode.EQUAL};
 const Set<int> _SEPS = {CharCode.CR, CharCode.LF, CharCode.SEMI, CharCode.COMMA};
 Set<int> _END_VALUE = _SEPS.union(_BRACKETS); //TODO string value 允许出现[]{}

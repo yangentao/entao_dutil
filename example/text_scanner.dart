@@ -12,7 +12,7 @@ void test12() {
   """;
   TextScanner ts = TextScanner(text);
   ts.skipSpaceTabCrLf();
-  ts.expectChar(CharCode.L_BRACE); // {
+  ts.expectChar(CharCode.LCUB); // {
   ts.printLastBuf();
   ts.skipSpaceTabCrLf();
 
