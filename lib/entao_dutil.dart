@@ -26,5 +26,5 @@ export 'src/bits.dart';
 export 'src/tcp_client.dart';
 export 'src/modbus.dart';
 export 'src/ini_file.dart';
-export 'src/jsons.dart';
+export 'src/yson.dart';
 export 'src/text_scanner.dart';

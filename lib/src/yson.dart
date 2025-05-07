@@ -5,15 +5,16 @@ import 'text_scanner.dart';
 
 void main() {
   // 1F600
-  print(JsonParser("""["aa", "bb" , "cc" ]""").parse());
-  print(JsonParser(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """).parse());
+  print(YsonParser("""["aa", "bb" , "cc" ]""").parse());
+  print(YsonParser(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """).parse());
 }
 
-/// strict = false 时,   键不需要引号,  逗号/分号/回车/换行都可以分割值.
-class JsonParser {
+/// 松散模式, 键不需要引号,  逗号/分号/回车/换行都可以分割值.
+
+class YsonParser {
   final TextScanner _ts;
 
-  JsonParser(String json) : _ts = TextScanner(json);
+  YsonParser(String json) : _ts = TextScanner(json);
 
   dynamic parse() {
     dynamic v = _parseValue();
