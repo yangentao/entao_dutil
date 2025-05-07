@@ -1,20 +1,58 @@
+import 'package:entao_dutil/src/basic.dart';
 import 'package:entao_dutil/src/char_code.dart';
 import 'package:entao_dutil/src/json.dart';
+import 'package:entao_dutil/src/strings.dart';
 
 import 'text_scanner.dart';
 
 void main() {
-  // 1F600
-  print(YsonParser("""["aa", "bb" , "cc" ]""").parse());
-  print(YsonParser(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """).parse());
+  print(yson.encode(null));
+  print(yson.encode(true));
+  print(yson.encode(false));
+  print(yson.encode(123));
+  print(yson.encode(123.4));
+  print(yson.encode("abc"));
+  print(yson.encode([1, 2, 3]));
+  print(yson.encode(["a", "b", "c"]));
+  print(yson.encode({"a": 1, "b": 2, "c": 3}));
 }
 
 /// 松散模式, 键不需要引号,  逗号/分号/回车/换行都可以分割值.
+///
+///
 
-class YsonParser {
+class yson {
+  yson._();
+
+  static String encode(dynamic value) {
+    switch (value) {
+      case null:
+        return "null";
+      case num n:
+        return n.toString();
+      case String s:
+        // TODO \? unicode
+        return s.quoted;
+      case bool b:
+        return b.toString();
+      case List ls:
+        return "[${ls.map((e) => encode(e)).join(", ")}]";
+      case Map map:
+        return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value)}").join(", ")}}";
+      default:
+        error("Unknown type: $value");
+    }
+  }
+
+  static dynamic decode(String json) {
+    return _YsonParser(json).parse();
+  }
+}
+
+class _YsonParser {
   final TextScanner _ts;
 
-  YsonParser(String json) : _ts = TextScanner(json);
+  _YsonParser(String json) : _ts = TextScanner(json);
 
   dynamic parse() {
     dynamic v = _parseValue();
@@ -39,11 +77,14 @@ class YsonParser {
       case >= CharCode.NUM0 && <= CharCode.NUM9:
         return _parseNum();
       case CharCode.n:
-        return _parseNull();
+        _ts.expectString("null");
+        return null;
       case CharCode.t:
-        return _parseTrue();
+        _ts.expectString("true");
+        return true;
       case CharCode.f:
-        return _parseFalse();
+        _ts.expectString("false");
+        return false;
       default:
         _raise();
     }
@@ -105,79 +146,8 @@ class YsonParser {
     return s;
   }
 
-  dynamic _parseNull() {
-    _ts.expectString("null");
-    return null;
-  }
-
-  bool _parseTrue() {
-    _ts.expectString("true");
-    return true;
-  }
-
-  bool _parseFalse() {
-    _ts.expectString("false");
-    return false;
-  }
-
   Never _raise([String msg = "Parse Error"]) {
     throw Exception("$msg. ${_ts.position}, ${_ts.leftText}");
-  }
-
-  static String _codesToString(List<int> charList) {
-    List<int> buf = [];
-    bool escaping = false;
-    int i = 0;
-    while (i < charList.length) {
-      int ch = charList[i];
-      if (!escaping) {
-        if (ch == CharCode.BSLASH) {
-          escaping = true;
-        } else {
-          buf.add(ch);
-        }
-      } else {
-        escaping = false;
-        switch (ch) {
-          case CharCode.SQUOTE || CharCode.BSLASH || CharCode.SLASH:
-            buf.add(ch);
-          case CharCode.b:
-            buf.add(CharCode.BS);
-          case CharCode.f:
-            buf.add(CharCode.FF);
-          case CharCode.n:
-            buf.add(CharCode.LF);
-          case CharCode.r:
-            buf.add(CharCode.CR);
-          case CharCode.t:
-            buf.add(CharCode.HTAB);
-          case CharCode.u || CharCode.U:
-            List<int> uls = [];
-            i += 1;
-            if (i < charList.length && charList[i] == CharCode.PLUS) {
-              i += 1;
-            }
-            while (i < charList.length && CharCode.isHex(charList[i])) {
-              uls.add(charList[i]);
-              i += 1;
-            }
-            if (uls.isEmpty) throw Exception("Convert to string failed: ${String.fromCharCodes(charList)}.");
-            String s = String.fromCharCodes(uls);
-            int n = int.parse(s, radix: 16);
-            buf.addAll(String.fromCharCode(n).codeUnits);
-            i -= 1;
-          default:
-            buf.add(ch);
-        }
-      }
-      i += 1;
-    }
-    return String.fromCharCodes(buf);
-  }
-
-  static bool _isNum(int ch) {
-    if (ch >= CharCode.NUM0 && ch <= CharCode.NUM9) return true;
-    return ch == CharCode.DOT || ch == CharCode.MINUS || ch == CharCode.PLUS || ch == CharCode.e || ch == CharCode.E;
   }
 }
 
@@ -187,4 +157,60 @@ extension _TextScannerExt on TextScanner {
   void skipWhites() {
     skipChars(_WHITES);
   }
+}
+
+bool _isNum(int ch) {
+  if (ch >= CharCode.NUM0 && ch <= CharCode.NUM9) return true;
+  return ch == CharCode.DOT || ch == CharCode.MINUS || ch == CharCode.PLUS || ch == CharCode.e || ch == CharCode.E;
+}
+
+String _codesToString(List<int> charList) {
+  List<int> buf = [];
+  bool escaping = false;
+  int i = 0;
+  while (i < charList.length) {
+    int ch = charList[i];
+    if (!escaping) {
+      if (ch == CharCode.BSLASH) {
+        escaping = true;
+      } else {
+        buf.add(ch);
+      }
+    } else {
+      escaping = false;
+      switch (ch) {
+        case CharCode.SQUOTE || CharCode.BSLASH || CharCode.SLASH:
+          buf.add(ch);
+        case CharCode.b:
+          buf.add(CharCode.BS);
+        case CharCode.f:
+          buf.add(CharCode.FF);
+        case CharCode.n:
+          buf.add(CharCode.LF);
+        case CharCode.r:
+          buf.add(CharCode.CR);
+        case CharCode.t:
+          buf.add(CharCode.HTAB);
+        case CharCode.u || CharCode.U:
+          List<int> uls = [];
+          i += 1;
+          if (i < charList.length && charList[i] == CharCode.PLUS) {
+            i += 1;
+          }
+          while (i < charList.length && CharCode.isHex(charList[i])) {
+            uls.add(charList[i]);
+            i += 1;
+          }
+          if (uls.isEmpty) throw Exception("Convert to string failed: ${String.fromCharCodes(charList)}.");
+          String s = String.fromCharCodes(uls);
+          int n = int.parse(s, radix: 16);
+          buf.addAll(String.fromCharCode(n).codeUnits);
+          i -= 1;
+        default:
+          buf.add(ch);
+      }
+    }
+    i += 1;
+  }
+  return String.fromCharCodes(buf);
 }
