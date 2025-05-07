@@ -2,11 +2,6 @@
 
 
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:entao_dutil/src/bits.dart';
-import 'package:entao_dutil/src/collection_list.dart';
-
-import 'basic.dart';
-import 'nums.dart';
 
 class Modbus {
   static const int E_BAD_FUNCTION = 1;
