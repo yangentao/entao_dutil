@@ -20,10 +20,10 @@ class yson {
       case bool b:
         return b.toString();
       case List ls:
-        return "[${ls.map((e) => encode(e)).join(", ")}]";
+        return "[${ls.map((e) => encode(e, loose: loose)).join(", ")}]";
       case Map map:
-        if (loose) return "{${map.entries.map((e) => "${e.key}:${encode(e.value)}").join(", ")}}";
-        return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value)}").join(", ")}}";
+        if (loose) return "{${map.entries.map((e) => "${e.key}:${encode(e.value, loose: loose)}").join(", ")}}";
+        return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value, loose: loose)}").join(", ")}}";
       default:
         error("Unknown type: $value");
     }
