@@ -1,46 +1,6 @@
-import 'package:entao_dutil/entao_dutil.dart';
 import 'package:entao_dutil/src/char_code.dart';
-
-void test12() {
-  String text = """
-  {
-  name:"entao",
-  male: true,
-  age: 44;
-  ls:[1,2,3];
-  }
-  """;
-  TextScanner ts = TextScanner(text);
-  ts.skipSpaceTabCrLf();
-  ts.tryExpectChar(CharCode.LCUB); // {
-  ts.printLastBuf();
-  ts.skipSpaceTabCrLf();
-
-  ts.expectIdent(); // name
-  ts.printLastBuf();
-
-  ts.skipSpaceTab();
-  ts.tryExpectChar(CharCode.COLON); // :
-  ts.skipSpaceTab();
-  ts.tryExpectChar(CharCode.QUOTE); // "
-  // ts.skip();
-  ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
-  ts.skip();
-  ts.printLastBuf();
-  ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA, CharCode.SEMI]);
-  ts.skipSpaceTabCrLf();
-
-  ts.tryExpectString("male");
-  ts.printLastBuf();
-}
-
-void main() {
-  String text = """abcd,def""";
-  TextScanner ts = TextScanner(text);
-  print(ts.tryExpectAnyString(["tt", "ff", "de"]));
-  ts.printLastBuf();
-  println(ts.position);
-}
+import 'package:entao_dutil/src/collection_sort.dart';
+import 'package:entao_dutil/src/strings.dart';
 
 typedef CharPredicator = bool Function(int);
 
