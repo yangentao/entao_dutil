@@ -12,7 +12,7 @@ void test12() {
   """;
   TextScanner ts = TextScanner(text);
   ts.skipSpaceTabCrLf();
-  ts.expectChar(CharCode.LCUB); // {
+  ts.tryExpectChar(CharCode.LCUB); // {
   ts.printLastBuf();
   ts.skipSpaceTabCrLf();
 
@@ -20,9 +20,9 @@ void test12() {
   ts.printLastBuf();
 
   ts.skipSpaceTab();
-  ts.expectChar(CharCode.COLON); // :
+  ts.tryExpectChar(CharCode.COLON); // :
   ts.skipSpaceTab();
-  ts.expectChar(CharCode.QUOTE); // "
+  ts.tryExpectChar(CharCode.QUOTE); // "
   // ts.skip();
   ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
   ts.skip();
@@ -30,14 +30,14 @@ void test12() {
   ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA, CharCode.SEMI]);
   ts.skipSpaceTabCrLf();
 
-  ts.expectString("male");
+  ts.tryExpectString("male");
   ts.printLastBuf();
 }
 
 void main() {
   String text = """abcd,def""";
   TextScanner ts = TextScanner(text);
-  print(ts.expectAnyString(["tt", "ff", "de"]));
+  print(ts.tryExpectAnyString(["tt", "ff", "de"]));
   ts.printLastBuf();
   println(ts.position);
 }
@@ -106,9 +106,16 @@ class TextScanner {
     return moveNext(terminator: (e) => chars.contains(e));
   }
 
+  void expectChar(int ch) {
+    List<int> ls = moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
+    bool ok = ls.length == 1 && ls.first == ch;
+    if (!ok) raise();
+  }
+
   /// 最多吃掉一个
-  List<int> expectChar(int ch) {
-    return moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
+  bool tryExpectChar(int ch) {
+    List<int> ls = moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
+    return ls.length == 1 && ls.first == ch;
   }
 
   /// 吃掉所有chars中包含的字符
@@ -117,8 +124,17 @@ class TextScanner {
     return moveNext(acceptor: (e) => chars.contains(e));
   }
 
+  /// 匹配失败, 跑出异常
+  void expectString(String s) {
+    assert(s.isNotEmpty);
+    List<int> cs = s.codeUnits;
+    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
+    bool ok = ls.length == cs.length;
+    if (!ok) raise("expect $s.");
+  }
+
   /// 匹配失败, 会回退位置
-  bool expectString(String s) {
+  bool tryExpectString(String s) {
     assert(s.isNotEmpty);
     ScanPos tp = savePosition();
     List<int> cs = s.codeUnits;
@@ -130,11 +146,11 @@ class TextScanner {
 
   /// 长度优先
   /// 匹配失败, 会回退位置
-  bool expectAnyString(List<String> slist) {
+  bool tryExpectAnyString(List<String> slist) {
     assert(slist.isNotEmpty);
     List<String> ls = slist.sortedProp((e) => e.length, desc: true);
     for (String s in ls) {
-      if (expectString(s)) return true;
+      if (tryExpectString(s)) return true;
     }
     return false;
   }
@@ -159,8 +175,8 @@ class TextScanner {
           return buf;
         }
       }
-    }
-    if (terminator != null) {
+      if (isEnd) return buf;
+    } else if (terminator != null) {
       while (!isEnd) {
         int ch = nowChar;
         if (terminator(ch)) {
@@ -170,17 +186,19 @@ class TextScanner {
           position += 1;
         }
       }
+      if (isEnd) return buf;
+    } else {
+      size ??= 1;
+      if (position + size > codeList.length) {
+        raise("Excede max length: $size");
+      }
+      buf.addAll(codeList.sublist(position, position + size));
+      position += size;
     }
-    size ??= 1;
-    if (position + size > codeList.length) {
-      scanError("Excede max length: $size");
-    }
-    buf.addAll(codeList.sublist(position, position + size));
-    position += size;
     return [];
   }
 
-  Never scanError(String msg) {
+  Never raise([String msg = "scan error"]) {
     throw Exception("$msg. $position, $leftText");
   }
 
