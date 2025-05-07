@@ -6,6 +6,7 @@ library;
 export 'src/basic.dart';
 export 'src/binders.dart';
 export 'src/bits.dart';
+export 'src/char_code.dart';
 export 'src/collection.dart';
 export 'src/collection_list.dart';
 export 'src/collection_sort.dart';
