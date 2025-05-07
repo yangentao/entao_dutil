@@ -5,47 +5,83 @@ import 'package:entao_dutil/src/strings.dart';
 
 import 'text_scanner.dart';
 
-void main() {
-  print(yson.encode(null));
-  print(yson.encode(true));
-  print(yson.encode(false));
-  print(yson.encode(123));
-  print(yson.encode(123.4));
-  print(yson.encode("abc"));
-  print(yson.encode([1, 2, 3]));
-  print(yson.encode(["a", "b", "c"]));
-  print(yson.encode({"a": 1, "b": 2, "c": 3}));
-}
-
 /// 松散模式, 键不需要引号,  逗号/分号/回车/换行都可以分割值.
-///
-///
-
 class yson {
   yson._();
 
-  static String encode(dynamic value) {
+  static String encode(dynamic value, {bool loose = false}) {
     switch (value) {
       case null:
         return "null";
       case num n:
         return n.toString();
       case String s:
-        // TODO \? unicode
-        return s.quoted;
+        return _encodeJsonString(s).quoted;
       case bool b:
         return b.toString();
       case List ls:
         return "[${ls.map((e) => encode(e)).join(", ")}]";
       case Map map:
+        if (loose) return "{${map.entries.map((e) => "${e.key}:${encode(e.value)}").join(", ")}}";
         return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value)}").join(", ")}}";
       default:
         error("Unknown type: $value");
     }
   }
 
-  static dynamic decode(String json) {
+  static dynamic decode(String json, {bool loose = false}) {
+    if (loose) return _LooseYsonParser(json).parse();
     return _YsonParser(json).parse();
+  }
+}
+
+class _LooseYsonParser extends _YsonParser {
+  _LooseYsonParser(super.json);
+
+  static final List<int> _ASSIGN = [CharCode.COLON, CharCode.EQUAL];
+  static final List<int> _SEP = [CharCode.COMMA, CharCode.SEMI, CharCode.CR, CharCode.LF];
+  static final List<int> _TRAIL = _WHITES + [CharCode.COMMA, CharCode.SEMI];
+
+  @override
+  JsonMap parseObject() {
+    _ts.skipWhites();
+    JsonMap map = {};
+    _ts.expectChar(CharCode.LCUB);
+    _ts.skipWhites();
+    while (_ts.nowChar != CharCode.RCUB) {
+      _ts.skipWhites();
+      String key = _ts.nowChar == CharCode.QUOTE ? _parseString() : _parseIdent();
+      _ts.skipWhites();
+      _ts.expectAnyChar(_ASSIGN);
+      // _ts.expectChar(CharCode.COLON);
+      dynamic v = _parseValue();
+      map[key] = v;
+      List<int> trails = _ts.skipChars(_TRAIL);
+      if (_ts.nowChar != CharCode.RCUB) {
+        if (!trails.any((e) => _SEP.contains(e))) _raise();
+      }
+    }
+    _ts.expectChar(CharCode.RCUB);
+    return map;
+  }
+
+  @override
+  JsonList parseArray() {
+    _ts.skipWhites();
+    JsonList list = [];
+    _ts.expectChar(CharCode.LSQB);
+    _ts.skipWhites();
+    while (_ts.nowChar != CharCode.RSQB) {
+      _ts.skipWhites();
+      dynamic v = _parseValue();
+      list.add(v);
+      List<int> trails = _ts.skipChars(_TRAIL);
+      if (_ts.nowChar != CharCode.RSQB) {
+        if (!trails.any((e) => _SEP.contains(e))) _raise();
+      }
+    }
+    _ts.expectChar(CharCode.RSQB);
+    return list;
   }
 }
 
@@ -67,9 +103,9 @@ class _YsonParser {
     int ch = _ts.nowChar;
     switch (ch) {
       case CharCode.LCUB:
-        return _parseObject();
+        return parseObject();
       case CharCode.LSQB:
-        return _parseArray();
+        return parseArray();
       case CharCode.QUOTE:
         return _parseString();
       case CharCode.MINUS:
@@ -90,7 +126,7 @@ class _YsonParser {
     }
   }
 
-  JsonMap _parseObject() {
+  JsonMap parseObject() {
     _ts.skipWhites();
     JsonMap map = {};
     _ts.expectChar(CharCode.LCUB);
@@ -112,7 +148,7 @@ class _YsonParser {
     return map;
   }
 
-  JsonList _parseArray() {
+  JsonList parseArray() {
     _ts.skipWhites();
     JsonList list = [];
     _ts.expectChar(CharCode.LSQB);
@@ -138,6 +174,12 @@ class _YsonParser {
     return n;
   }
 
+  String _parseIdent() {
+    List<int> charList = _ts.moveNext(acceptor: (e) => CharCode.isIdent(e));
+    if (charList.isEmpty) _raise();
+    return String.fromCharCodes(charList);
+  }
+
   String _parseString() {
     _ts.expectChar(CharCode.QUOTE);
     List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
@@ -152,10 +194,15 @@ class _YsonParser {
 }
 
 List<int> _WHITES = [CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF];
+List<int> _SpTab = [CharCode.SP, CharCode.HTAB];
 
 extension _TextScannerExt on TextScanner {
-  void skipWhites() {
-    skipChars(_WHITES);
+  List<int> skipWhites() {
+    return skipChars(_WHITES);
+  }
+
+  void skipSpTab() {
+    skipChars(_SpTab);
   }
 }
 
@@ -213,4 +260,84 @@ String _codesToString(List<int> charList) {
     i += 1;
   }
   return String.fromCharCodes(buf);
+}
+
+String _encodeJsonString(String s) {
+  List<int> chars = s.codeUnits;
+  List<int> buf = [];
+  int i = 0;
+  while (i < chars.length) {
+    int ch = chars[i];
+    if (ch < 32) {
+      switch (ch) {
+        case CharCode.BS:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.b);
+        case CharCode.FF:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.f);
+        case CharCode.LF:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.n);
+        case CharCode.CR:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.r);
+        case CharCode.HTAB:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.t);
+        default:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.u);
+          buf.add(CharCode.NUM0);
+          buf.add(CharCode.NUM0);
+          buf.add(_lastHex(ch >> 4));
+          buf.add(_lastHex(ch));
+      }
+    } else if (ch > _utf16Lead && (i + 1 < chars.length) && _isUtf16(ch, chars[i + 1])) {
+      buf.add(CharCode.BSLASH);
+      buf.add(CharCode.u);
+      buf.add(CharCode.d);
+      buf.add(_lastHex(ch >> 8));
+      buf.add(_lastHex(ch >> 4));
+      buf.add(_lastHex(ch));
+
+      int cc = chars[i + 1];
+      buf.add(CharCode.BSLASH);
+      buf.add(CharCode.u);
+      buf.add(CharCode.d);
+      buf.add(_lastHex(cc >> 8));
+      buf.add(_lastHex(cc >> 4));
+      buf.add(_lastHex(cc));
+      i += 1;
+    } else {
+      switch (ch) {
+        case CharCode.SQUOTE:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.SQUOTE);
+        case CharCode.BSLASH:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.BSLASH);
+        case CharCode.SLASH:
+          buf.add(CharCode.BSLASH);
+          buf.add(CharCode.SLASH);
+        default:
+          buf.add(ch);
+      }
+    }
+    i += 1;
+  }
+  return String.fromCharCodes(buf);
+}
+
+// '0' + x  or  'a' + x - 10
+int _hex4(int x) => x < 10 ? 48 + x : 87 + x;
+
+int _lastHex(int x) => _hex4(x & 0x0F);
+
+int _utf16Lead = 0xD800; // 110110 00
+int _utf16Trail = 0xDC00; // 110111 00
+int _utf16Mask = 0xFC00; // 111111 00
+
+bool _isUtf16(int a, int b) {
+  return (a & _utf16Mask == _utf16Lead) && (b & _utf16Mask == _utf16Trail);
 }

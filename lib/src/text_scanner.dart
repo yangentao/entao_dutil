@@ -45,20 +45,20 @@ class TextScanner {
     if (position > 0) position -= 1;
   }
 
-  void skipSpaceTabCrLf() {
-    skipChars([CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF]);
+  List<int> skipSpaceTabCrLf() {
+    return skipChars([CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF]);
   }
 
-  void skipSpaceTab() {
-    skipChars([CharCode.SP, CharCode.HTAB]);
+  List<int> skipSpaceTab() {
+    return skipChars([CharCode.SP, CharCode.HTAB]);
   }
 
-  void skipChars(List<int> ls) {
-    skip(acceptor: (e) => ls.contains(e));
+  List<int> skipChars(List<int> ls) {
+    return skip(acceptor: (e) => ls.contains(e));
   }
 
-  void skip({int? size, CharPredicator? acceptor, CharPredicator? terminator}) {
-    moveNext(size: size, acceptor: acceptor, terminator: terminator, buffered: false);
+  List<int> skip({int? size, CharPredicator? acceptor, CharPredicator? terminator}) {
+    return moveNext(size: size, acceptor: acceptor, terminator: terminator, buffered: false);
   }
 
   List<int> moveUntil(List<int> chars) {
@@ -78,10 +78,12 @@ class TextScanner {
     return ls.length == 1 && ls.first == ch;
   }
 
-  /// 吃掉所有chars中包含的字符
+  /// 吃掉所有chars中包含的字符, 至少吃掉一个
   List<int> expectAnyChar(List<int> chars) {
     assert(chars.isNotEmpty);
-    return moveNext(acceptor: (e) => chars.contains(e));
+    List<int> ls = moveNext(acceptor: (e) => chars.contains(e));
+    if (ls.isEmpty) raise();
+    return ls;
   }
 
   /// 匹配失败, 跑出异常
@@ -116,7 +118,9 @@ class TextScanner {
   }
 
   List<int> expectIdent() {
-    return moveNext(acceptor: (e) => CharCode.isIdent(e) && (lastBuf.isEmpty || !CharCode.isNum(lastBuf.first)));
+    List<int> ls = moveNext(acceptor: (e) => CharCode.isIdent(e) && (lastBuf.isEmpty || !CharCode.isNum(lastBuf.first)));
+    if (ls.isEmpty) raise();
+    return ls;
   }
 
   /// if size,acceptor,terminator all is null, moveNext(size = 1)
@@ -155,7 +159,7 @@ class TextScanner {
       buf.addAll(codeList.sublist(position, position + size));
       position += size;
     }
-    return [];
+    return buf;
   }
 
   Never raise([String msg = "scan error"]) {
