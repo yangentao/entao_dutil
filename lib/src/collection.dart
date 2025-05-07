@@ -3,6 +3,16 @@ import 'dart:collection';
 import 'basic.dart';
 
 extension IterableExt<E> on Iterable<E> {
+  Set<E> intersect(Iterable<E> other) {
+    Set<E> set = {};
+    for (E e in this) {
+      if (other.contains(e)) {
+        set.add(e);
+      }
+    }
+    return set;
+  }
+
   Map<K, E> toMap<K>(K Function(E) block) {
     Map<K, E> map = {};
     for (E e in this) {

@@ -53,7 +53,7 @@ class TextScanner {
     return skipChars([CharCode.SP, CharCode.HTAB]);
   }
 
-  List<int> skipChars(List<int> ls) {
+  List<int> skipChars(Iterable<int> ls) {
     return skip(acceptor: (e) => ls.contains(e));
   }
 
@@ -79,7 +79,7 @@ class TextScanner {
   }
 
   /// 吃掉所有chars中包含的字符, 至少吃掉一个
-  List<int> expectAnyChar(List<int> chars) {
+  List<int> expectAnyChar(Iterable<int> chars) {
     assert(chars.isNotEmpty);
     List<int> ls = moveNext(acceptor: (e) => chars.contains(e));
     if (ls.isEmpty) raise();
@@ -108,7 +108,7 @@ class TextScanner {
 
   /// 长度优先
   /// 匹配失败, 会回退位置
-  bool tryExpectAnyString(List<String> slist) {
+  bool tryExpectAnyString(Iterable<String> slist) {
     assert(slist.isNotEmpty);
     List<String> ls = slist.sortedProp((e) => e.length, desc: true);
     for (String s in ls) {

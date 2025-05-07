@@ -1,5 +1,6 @@
 import 'package:entao_dutil/src/basic.dart';
 import 'package:entao_dutil/src/char_code.dart';
+import 'package:entao_dutil/src/collection.dart';
 import 'package:entao_dutil/src/json.dart';
 import 'package:entao_dutil/src/strings.dart';
 
@@ -38,9 +39,9 @@ class yson {
 class _LooseYsonParser extends _YsonParser {
   _LooseYsonParser(super.json);
 
-  static final List<int> _ASSIGN = [CharCode.COLON, CharCode.EQUAL];
-  static final List<int> _SEP = [CharCode.COMMA, CharCode.SEMI, CharCode.CR, CharCode.LF];
-  static final List<int> _TRAIL = _WHITES + [CharCode.COMMA, CharCode.SEMI];
+  static final Set<int> _ASSIGN = {CharCode.COLON, CharCode.EQUAL};
+  static final Set<int> _SEP = {CharCode.COMMA, CharCode.SEMI, CharCode.CR, CharCode.LF};
+  static final Set<int> _TRAIL = {CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF, CharCode.COMMA, CharCode.SEMI};
 
   @override
   JsonMap parseObject() {
@@ -58,7 +59,7 @@ class _LooseYsonParser extends _YsonParser {
       map[key] = v;
       List<int> trails = _ts.skipChars(_TRAIL);
       if (_ts.nowChar != CharCode.RCUB) {
-        if (!trails.any((e) => _SEP.contains(e))) _raise();
+        if (trails.intersect(_SEP).isEmpty) _raise();
       }
     }
     _ts.expectChar(CharCode.RCUB);
@@ -77,7 +78,7 @@ class _LooseYsonParser extends _YsonParser {
       list.add(v);
       List<int> trails = _ts.skipChars(_TRAIL);
       if (_ts.nowChar != CharCode.RSQB) {
-        if (!trails.any((e) => _SEP.contains(e))) _raise();
+        if (trails.intersect(_SEP).isEmpty) _raise();
       }
     }
     _ts.expectChar(CharCode.RSQB);
@@ -193,8 +194,8 @@ class _YsonParser {
   }
 }
 
-List<int> _WHITES = [CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF];
-List<int> _SpTab = [CharCode.SP, CharCode.HTAB];
+Set<int> _WHITES = {CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF};
+Set<int> _SPTAB = {CharCode.SP, CharCode.HTAB};
 
 extension _TextScannerExt on TextScanner {
   List<int> skipWhites() {
@@ -202,7 +203,7 @@ extension _TextScannerExt on TextScanner {
   }
 
   void skipSpTab() {
-    skipChars(_SpTab);
+    skipChars(_SPTAB);
   }
 }
 
