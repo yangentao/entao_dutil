@@ -34,3 +34,6 @@
 
 ## 1.0.12
 * yson, hex
+
+## 1.0.13
+* text scanner.
