@@ -220,8 +220,16 @@ extension StringExtension on String {
     return substringBefore("\r").substringBefore("\n");
   }
 
-  String head(int n) {
-    if (length < n) return this;
+  String head(int n, {bool checkUTF16 = false}) {
+    if (n >= length) return this;
+    if (n <= 0) return "";
+    if (checkUTF16) {
+      int ch = this.codeUnitAt(n - 1);
+      if (isUtf16Lead(ch)) {
+        if (n + 1 < length) return substring(0, n + 1);
+        if (n - 1 >= 0) return substring(0, n - 1);
+      }
+    }
     return substring(0, n);
   }
 
@@ -229,8 +237,9 @@ extension StringExtension on String {
     if (length < n) return this;
     return substring(length - n);
   }
-  String skip({required int head, int tail = 0}){
-    if(head + tail  >= length) return "";
+
+  String skip({required int head, int tail = 0}) {
+    if (head + tail >= length) return "";
     return substring(head, length - tail);
   }
 
@@ -280,3 +289,18 @@ List<MapEntry<String, String>> parseProperties(String text, {Pattern? itemSep, P
   }
   return values;
 }
+
+const int UTF16LEAD = 0xD800; // 110110 00
+const int UTF16TRAIL = 0xDC00; // 110111 00
+const int UTF16MASK = 0xFC00; // 111111 00
+
+bool isUtf16Lead(int code) => code & UTF16MASK == UTF16LEAD;
+
+bool isUtf16Trail(int code) => code & UTF16MASK == UTF16TRAIL;
+
+// void main(){
+//   String s = "😇😅🥰😋😉😉😊🤙🦶🚴‍♀️🐒👫🎠🚢🛟🛟";
+//   print(s.head(2));
+//   print(s.head(4));
+//   print(s.head(3, checkUTF16: true ));
+// }

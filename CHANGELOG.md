@@ -37,3 +37,6 @@
 
 ## 1.0.13
 * text scanner.
+
+## 1.0.15
+* utf16, head
