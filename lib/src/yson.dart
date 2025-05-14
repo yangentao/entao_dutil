@@ -176,14 +176,14 @@ class _YsonParser {
   }
 
   String _parseIdent() {
-    List<int> charList = _ts.moveNext(acceptor: (e) => CharCode.isIdent(e));
+    List<int> charList = _ts.expectIdent();
     if (charList.isEmpty) _raise();
     return String.fromCharCodes(charList);
   }
 
   String _parseString() {
     _ts.expectChar(CharCode.QUOTE);
-    List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
+    List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE && _ts.lastBuf.lastOrNull != CharCode.BSLASH);
     String s = _codesToString(charList);
     _ts.expectChar(CharCode.QUOTE);
     return s;
@@ -245,11 +245,11 @@ String _codesToString(List<int> charList) {
           if (i < charList.length && charList[i] == CharCode.PLUS) {
             i += 1;
           }
-          while (i < charList.length && CharCode.isHex(charList[i])) {
+          while (i < charList.length && charList.length < 4 && CharCode.isHex(charList[i])) {
             uls.add(charList[i]);
             i += 1;
           }
-          if (uls.isEmpty) throw Exception("Convert to string failed: ${String.fromCharCodes(charList)}.");
+          if (uls.length != 4) throw Exception("Convert to string failed: ${String.fromCharCodes(charList)}.");
           String s = String.fromCharCodes(uls);
           int n = int.parse(s, radix: 16);
           buf.addAll(String.fromCharCode(n).codeUnits);
