@@ -118,7 +118,7 @@ class TextScanner {
   }
 
   List<int> expectIdent() {
-    List<int> ls = moveNext(acceptor: (e) => CharCode.isIdent(e) && (lastBuf.isEmpty || !CharCode.isNum(lastBuf.first)));
+    List<int> ls = moveNext(acceptor: (e) => lastBuf.isEmpty ? (CharCode.isAlpha(e) || e == CharCode.LOWBAR) : CharCode.isIdent(e));
     if (ls.isEmpty) raise();
     return ls;
   }
@@ -154,7 +154,7 @@ class TextScanner {
     } else {
       size ??= 1;
       if (position + size > codeList.length) {
-        raise("Excede max length: $size");
+        raise("Exceed max length: $size");
       }
       buf.addAll(codeList.sublist(position, position + size));
       position += size;
