@@ -231,6 +231,23 @@ class JsonResult {
 
   JsonValue attr(String name) => jsonValue[name];
 
+  /// 第一行是列名, 第二行开始是数据, 类似csv格式
+  List<T> tableData<T>(T Function(JsonValue) maper) {
+    List<JsonValue> rows = data.listValue;
+    if (rows.length <= 1) return [];
+    List<String> rowKey = rows.first.listString;
+    List<T> models = [];
+    for (int i = 1; i < rows.length; ++i) {
+      JsonValue jv = JsonValue.object();
+      JsonValue data = rows[i];
+      for (int c = 0; c < rowKey.length; ++c) {
+        jv.set(rowKey[c], data[c]);
+      }
+      models.add(maper(jv));
+    }
+    return models;
+  }
+
   List<T> listData<T>(T Function(JsonValue) maper) {
     return data.listValue.mapList(maper);
   }
