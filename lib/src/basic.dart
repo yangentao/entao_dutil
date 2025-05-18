@@ -252,3 +252,21 @@ class SomeProp<T extends Object> {
     return "$runtimeType{ key=$key, value=$value }";
   }
 }
+
+mixin MixCompare<T> implements Comparable<T> {
+  bool operator <(T other) {
+    return this.compareTo(other) < 0;
+  }
+
+  bool operator <=(T other) {
+    return this.compareTo(other) <= 0;
+  }
+
+  bool operator >(T other) {
+    return this.compareTo(other) > 0;
+  }
+
+  bool operator >=(T other) {
+    return this.compareTo(other) >= 0;
+  }
+}

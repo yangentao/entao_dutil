@@ -1,180 +1,270 @@
+import 'package:entao_dutil/src/collection.dart';
+import 'package:entao_dutil/src/vararg_call.dart';
+
 import 'basic.dart';
-import 'collection.dart';
 import 'datetime.dart';
 
-enum LogLevel {
+void main() {
+  _testLog();
+}
+
+void _testLog() {
+  logv("yang", tag: "hello", 12, 3);
+  logd("debug", "Entao", 9999);
+  logi("info");
+  loge("error");
+  var lg = TagLog("yet");
+  lg.e("hello tag");
+  lg.i("info", 12, 3);
+}
+
+dynamic println = VarargFunction((args, kwargs) {
+  StringSink? buf = kwargs["buf"];
+  if (buf != null) {
+    String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+    buf.writeln(line);
+    return;
+  }
+  if (!isDebugMode) return;
+  String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+  print(line);
+});
+
+dynamic logv = VarargFunction((args, kwargs) {
+  XLog.logItem(LogLevel.VERBOSE, args, tag: kwargs["tag"]);
+});
+
+dynamic logd = VarargFunction((args, kwargs) {
+  XLog.logItem(LogLevel.DEBUG, args, tag: kwargs["tag"]);
+});
+
+dynamic logi = VarargFunction((args, kwargs) {
+  XLog.logItem(LogLevel.INFO, args, tag: kwargs["tag"]);
+});
+
+dynamic logw = VarargFunction((args, kwargs) {
+  XLog.logItem(LogLevel.WARNING, args, tag: kwargs["tag"]);
+});
+
+dynamic loge = VarargFunction((args, kwargs) {
+  XLog.logItem(LogLevel.ERROR, args, tag: kwargs["tag"]);
+});
+
+enum LogLevel with MixCompare<LogLevel> {
   ALL,
+  VERBOSE,
   DEBUG,
   INFO,
   WARNING,
   ERROR,
-  NONE;
+  FATAIL,
+  OFF;
 
-  bool get allowed => index >= LogConfig.minLevel.index;
-}
+  bool allow(LogLevel other) => other >= this;
 
-class LogConfig {
-  LogConfig._();
+  String get firstChar => this.name.substring(0, 1);
 
-  static LogLevel minLevel = LogLevel.ALL;
-
-  static String seprator = ", ";
-  static void Function(String line) printer = (line) {
-    if (isDebugMode) print(line);
-  };
-  static String Function(dynamic value) textConvert = (v) => v.toString();
-}
-
-typedef LogPrinter = void Function(String?);
-
-List<LogPrinter> globalLogPrinters = [print];
-
-//end不能时const, 否则就跟_nothing指向了同一个对象, 无法区分了.
-final Object end = Object();
-const Object _nothing = Object();
-
-void println([
-  dynamic arg = _nothing,
-  dynamic arg1 = _nothing,
-  dynamic arg2 = _nothing,
-  dynamic arg3 = _nothing,
-  dynamic arg4 = _nothing,
-  dynamic arg5 = _nothing,
-  dynamic arg6 = _nothing,
-  dynamic arg7 = _nothing,
-  dynamic arg8 = _nothing,
-  dynamic arg9 = _nothing,
-]) {
-  if (!isDebugMode) return;
-  List<dynamic> ls = [arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9];
-  String line = ls.filter((e) => !identical(e, _nothing)).map((e) => e.toString()).join(" ");
-  print(line);
-}
-
-void _log(
-  LogLevel level, [
-  dynamic arg = _nothing,
-  dynamic arg1 = _nothing,
-  dynamic arg2 = _nothing,
-  dynamic arg3 = _nothing,
-  dynamic arg4 = _nothing,
-  dynamic arg5 = _nothing,
-  dynamic arg6 = _nothing,
-  dynamic arg7 = _nothing,
-  dynamic arg8 = _nothing,
-  dynamic arg9 = _nothing,
-]) {
-  if (!level.allowed) return;
-  List<dynamic> ls = [arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9];
-  String line = ls.filter((e) => !identical(e, _nothing)).map((e) => e.toString()).join(" ");
-  String tm = DateTime.now().formatDateTimeX;
-  for (LogPrinter p in globalLogPrinters) {
-    p("$tm ${level.name}: $line");
+  @override
+  int compareTo(LogLevel other) {
+    return this.index - other.index;
   }
 }
 
-void logd([
-  dynamic arg = _nothing,
-  dynamic arg1 = _nothing,
-  dynamic arg2 = _nothing,
-  dynamic arg3 = _nothing,
-  dynamic arg4 = _nothing,
-  dynamic arg5 = _nothing,
-  dynamic arg6 = _nothing,
-  dynamic arg7 = _nothing,
-  dynamic arg8 = _nothing,
-  dynamic arg9 = _nothing,
-]) {
-  if (LogLevel.DEBUG.allowed) {
-    _log(LogLevel.DEBUG, arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+class LogItem {
+  LogLevel level;
+  String message;
+  String tag;
+  DateTime time;
+  late String textLine;
+
+  LogItem({required this.level, required this.message, required this.tag, required this.time}) {
+    textLine = XLog.formater.format(this);
   }
 }
 
-void loge([
-  dynamic arg = _nothing,
-  dynamic arg1 = _nothing,
-  dynamic arg2 = _nothing,
-  dynamic arg3 = _nothing,
-  dynamic arg4 = _nothing,
-  dynamic arg5 = _nothing,
-  dynamic arg6 = _nothing,
-  dynamic arg7 = _nothing,
-  dynamic arg8 = _nothing,
-  dynamic arg9 = _nothing,
-]) {
-  if (LogLevel.ERROR.allowed) {
-    _log(LogLevel.ERROR, arg, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+abstract interface class LogFormater {
+  String format(LogItem item);
+}
+
+abstract interface class LogFilter {
+  bool allow(LogItem item);
+}
+
+class TreeLogFilter extends LogFilter {
+  List<LogFilter> list;
+
+  TreeLogFilter(this.list);
+
+  @override
+  bool allow(LogItem item) {
+    return list.all((e) => e.allow(item));
   }
 }
 
-class Log {
-  final List<dynamic> _values = [];
+abstract class LogPrinter {
+  LogLevel level = LogLevel.ALL;
 
-  Log._create();
+  void printIf(LogItem item) {
+    if (level.allow(item.level)) printItem(item);
+  }
 
-  Log flush() {
-    if (_values.isEmpty) return this;
-    String line = "";
-    if (_values.first is LogLevel) {
-      LogLevel level = _values.first as LogLevel;
-      if (level.index < LogConfig.minLevel.index) {
-        _values.clear();
-        return this;
-      }
-      line = "${level.name}: ${_values.sublist(1).map(LogConfig.textConvert).join(LogConfig.seprator)}";
-    } else {
-      line = _values.map(LogConfig.textConvert).join(LogConfig.seprator);
+  void printItem(LogItem item);
+
+  void flush();
+
+  void dispose() {}
+}
+
+class TreeLogPrinter extends LogPrinter {
+  List<LogPrinter> list;
+
+  TreeLogPrinter(this.list);
+
+  @override
+  void printItem(LogItem item) {
+    for (var p in list) {
+      p.printIf(item);
     }
-    _values.clear();
-    LogConfig.printer(line);
-    return this;
   }
 
-  Log _append(dynamic value) {
-    if (identical(_nothing, value)) return this;
-
-    if (identical(value, end)) {
-      flush();
-      return this;
+  @override
+  void flush() {
+    for (var e in list) {
+      e.flush();
     }
-
-    _values.add(value);
-    return this;
   }
-
-  Log operator <<(dynamic value) {
-    _append(value);
-    return this;
-  }
-
-  void println([
-    dynamic arg = _nothing,
-    dynamic arg1 = _nothing,
-    dynamic arg2 = _nothing,
-    dynamic arg3 = _nothing,
-    dynamic arg4 = _nothing,
-    dynamic arg5 = _nothing,
-    dynamic arg6 = _nothing,
-    dynamic arg7 = _nothing,
-    dynamic arg8 = _nothing,
-    dynamic arg9 = _nothing,
-  ]) {
-    _append(arg);
-    _append(arg1);
-    _append(arg2);
-    _append(arg3);
-    _append(arg4);
-    _append(arg5);
-    _append(arg6);
-    _append(arg7);
-    _append(arg8);
-    _append(arg9);
-    _append(end);
-  }
-
-  static Log inst = Log._create();
 }
 
-Log get Logd => Log.inst.flush() << LogLevel.DEBUG;
+class FuncLogPrinter extends LogPrinter {
+  void Function(LogItem)? callback;
 
-Log get Loge => Log.inst.flush() << LogLevel.ERROR;
+  FuncLogPrinter(this.callback);
+
+  @override
+  void printItem(LogItem item) {
+    callback?.call(item);
+  }
+
+  @override
+  void flush() {}
+}
+
+class ConsolePrinter extends LogPrinter {
+  ConsolePrinter._internal();
+
+  ConsolePrinter._();
+
+  @override
+  void printItem(LogItem item) {
+    switch (item.level) {
+      case LogLevel.VERBOSE:
+        print(sgr("2") + sgr("3") + item.textLine + sgr("0"));
+      case LogLevel.INFO:
+        print(sgr("1") + item.textLine + sgr("0"));
+      case LogLevel.WARNING:
+        print(sgr("33") + item.textLine + sgr("0"));
+      case >= LogLevel.ERROR:
+        print(sgr("31") + item.textLine + sgr("0"));
+      default:
+        print(item.textLine);
+    }
+  }
+
+  static String sgr(String code) {
+    return "\u001b[${code}m";
+  }
+
+  static final ConsolePrinter inst = ConsolePrinter._internal();
+
+  @override
+  void flush() {}
+}
+
+class DefaultLogFormater extends LogFormater {
+  @override
+  String format(LogItem item) {
+    return "${item.time.formatDateTimeX} ${item.level.firstChar} ${item.tag}: ${item.message}";
+  }
+}
+
+class TagLog {
+  String tag;
+
+  TagLog(this.tag);
+
+  late dynamic v = VarargFunction((args, kwargs) {
+    XLog.logItem(LogLevel.VERBOSE, args, tag: tag);
+  });
+  late dynamic d = VarargFunction((args, kwargs) {
+    XLog.logItem(LogLevel.DEBUG, args, tag: tag);
+  });
+  late dynamic w = VarargFunction((args, kwargs) {
+    XLog.logItem(LogLevel.WARNING, args, tag: tag);
+  });
+  late dynamic i = VarargFunction((args, kwargs) {
+    XLog.logItem(LogLevel.INFO, args, tag: tag);
+  });
+  late dynamic e = VarargFunction((args, kwargs) {
+    XLog.logItem(LogLevel.ERROR, args, tag: tag);
+  });
+}
+
+final class XLog {
+  XLog._();
+
+  static String tag = "xlog";
+  static LogLevel level = LogLevel.ALL;
+  static LogFormater formater = DefaultLogFormater();
+  static LogFilter? filter;
+  static LogPrinter _printer = ConsolePrinter.inst;
+
+  void setPrinter(LogPrinter p) {
+    _printer.dispose();
+    _printer = p;
+  }
+
+  static void logItem(LogLevel level, List<dynamic> messages, {String? tag}) {
+    if (!XLog.level.allow(level)) return;
+    if (!_printer.level.allow(level)) return;
+    LogItem item = LogItem(level: level, message: _anyListToString(messages), tag: tag ?? XLog.tag, time: DateTime.now());
+    if (filter?.allow(item) == false) return;
+    _printer.printIf(item);
+  }
+
+  static void verbose(List<dynamic> messages) {
+    logItem(LogLevel.VERBOSE, messages);
+  }
+
+  static void debug(List<dynamic> messages) {
+    logItem(LogLevel.DEBUG, messages);
+  }
+
+  static void info(List<dynamic> messages) {
+    logItem(LogLevel.INFO, messages);
+  }
+
+  static void warn(List<dynamic> messages) {
+    logItem(LogLevel.WARNING, messages);
+  }
+
+  static void error(List<dynamic> messages) {
+    logItem(LogLevel.ERROR, messages);
+  }
+}
+
+String _anyListToString(List<dynamic> messages) {
+  return messages.map((e) => _anyToString(e)).join(" ");
+}
+
+String _anyToString(dynamic value) {
+  switch (value) {
+    case null:
+      return "null";
+    case String s:
+      return s;
+    case num n:
+      return n.toString();
+    default:
+      return value.toString();
+  }
+}
