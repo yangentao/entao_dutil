@@ -1,10 +1,23 @@
+import 'dart:io';
+
 import 'package:entao_dutil/src/collection.dart';
 import 'package:entao_dutil/src/vararg_call.dart';
 
 import 'basic.dart';
 import 'datetime.dart';
 
-void main() {
+void main() async {
+  var p = FileLogPrinter(File("/Users/entao/Downloads/a.txt"));
+  var tree = TreeLogPrinter([p, ConsolePrinter.inst]);
+  ConsolePrinter.inst.level = LogLevel.OFF;
+  // XLog.setPrinter(BufPrinter());
+  XLog.setPrinter(tree);
+  _testLog();
+  await delayMills(3000);
+  _testLog();
+  await delayMills(3000);
+  _testLog();
+  await delayMills(3000);
   _testLog();
 }
 
@@ -12,10 +25,50 @@ void _testLog() {
   logv("yang", tag: "hello", 12, 3);
   logd("debug", "Entao", 9999);
   logi("info");
+  logw("hello ");
   loge("error");
   var lg = TagLog("yet");
   lg.e("hello tag");
   lg.i("info", 12, 3);
+}
+
+class BufPrinter extends LogPrinter {
+  StringBuffer buf = StringBuffer();
+
+  @override
+  void flush() {
+    if (buf.isEmpty) return;
+    print(buf.toString());
+    buf.clear();
+    print("flush...");
+  }
+
+  @override
+  void printItem(LogItem item) {
+    buf.writeln(item);
+  }
+}
+
+class FileLogPrinter extends LogPrinter {
+  File file;
+  IOSink fileSink;
+
+  FileLogPrinter(this.file) : fileSink = file.openWrite(mode: FileMode.append);
+
+  @override
+  void dispose() {
+    fileSink.close();
+  }
+
+  @override
+  void flush() {
+    fileSink.flush();
+  }
+
+  @override
+  void printItem(LogItem item) {
+    fileSink.writeln(item.toString());
+  }
 }
 
 dynamic println = VarargFunction((args, kwargs) {
@@ -79,6 +132,11 @@ class LogItem {
 
   LogItem({required this.level, required this.message, required this.tag, required this.time}) {
     textLine = XLog.formater.format(this);
+  }
+
+  @override
+  String toString() {
+    return textLine;
   }
 }
 
@@ -158,15 +216,15 @@ class ConsolePrinter extends LogPrinter {
   void printItem(LogItem item) {
     switch (item.level) {
       case LogLevel.VERBOSE:
-        print(sgr("2") + sgr("3") + item.textLine + sgr("0"));
+        print(sgr("2") + sgr("3") + item.toString() + sgr("0"));
       case LogLevel.INFO:
-        print(sgr("1") + item.textLine + sgr("0"));
+        print(sgr("1") + item.toString() + sgr("0"));
       case LogLevel.WARNING:
-        print(sgr("33") + item.textLine + sgr("0"));
+        print(sgr("33") + item.toString() + sgr("0"));
       case >= LogLevel.ERROR:
-        print(sgr("31") + item.textLine + sgr("0"));
+        print(sgr("31") + item.toString() + sgr("0"));
       default:
-        print(item.textLine);
+        print(item.toString());
     }
   }
 
@@ -193,19 +251,19 @@ class TagLog {
   TagLog(this.tag);
 
   late dynamic v = VarargFunction((args, kwargs) {
-    XLog.logItem(LogLevel.VERBOSE, args, tag: tag);
+    XLog.logItem(LogLevel.VERBOSE, args, tag: kwargs["tag"] ?? tag);
   });
   late dynamic d = VarargFunction((args, kwargs) {
-    XLog.logItem(LogLevel.DEBUG, args, tag: tag);
+    XLog.logItem(LogLevel.DEBUG, args, tag: kwargs["tag"] ?? tag);
   });
   late dynamic w = VarargFunction((args, kwargs) {
-    XLog.logItem(LogLevel.WARNING, args, tag: tag);
+    XLog.logItem(LogLevel.WARNING, args, tag: kwargs["tag"] ?? tag);
   });
   late dynamic i = VarargFunction((args, kwargs) {
-    XLog.logItem(LogLevel.INFO, args, tag: tag);
+    XLog.logItem(LogLevel.INFO, args, tag: kwargs["tag"] ?? tag);
   });
   late dynamic e = VarargFunction((args, kwargs) {
-    XLog.logItem(LogLevel.ERROR, args, tag: tag);
+    XLog.logItem(LogLevel.ERROR, args, tag: kwargs["tag"] ?? tag);
   });
 }
 
@@ -217,8 +275,27 @@ final class XLog {
   static LogFormater formater = DefaultLogFormater();
   static LogFilter? filter;
   static LogPrinter _printer = ConsolePrinter.inst;
+  static int _lastMessageTime = 0;
+  static final Duration _flushDuration = Duration(seconds: 2);
 
-  void setPrinter(LogPrinter p) {
+  static void _delayFlush(int tmMsg) {
+    if (tmMsg < _lastMessageTime + _flushDuration.inMilliseconds) {
+      return;
+    }
+    _lastMessageTime = tmMsg;
+    Future.delayed(_flushDuration, flush);
+  }
+
+  static void flush() {
+    _lastMessageTime = 0;
+    _printer.flush();
+    if (_lastMessageTime != 0) {
+      stderr.writeln("DONT log message in flush().");
+    }
+  }
+
+  static void setPrinter(LogPrinter p) {
+    _printer.flush();
     _printer.dispose();
     _printer = p;
   }
@@ -226,9 +303,13 @@ final class XLog {
   static void logItem(LogLevel level, List<dynamic> messages, {String? tag}) {
     if (!XLog.level.allow(level)) return;
     if (!_printer.level.allow(level)) return;
-    LogItem item = LogItem(level: level, message: _anyListToString(messages), tag: tag ?? XLog.tag, time: DateTime.now());
+    DateTime tm = DateTime.now();
+    LogItem item = LogItem(level: level, message: _anyListToString(messages), tag: tag ?? XLog.tag, time: tm);
     if (filter?.allow(item) == false) return;
     _printer.printIf(item);
+    if (_printer is! ConsolePrinter) {
+      _delayFlush(tm.milliSeconds1970);
+    }
   }
 
   static void verbose(List<dynamic> messages) {
