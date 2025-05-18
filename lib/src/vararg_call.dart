@@ -56,3 +56,15 @@ dynamic printE = VarargFunction((args, kwargs) {
 String _sgr(String code) {
   return "\u001b[${code}m";
 }
+
+dynamic println = VarargFunction((args, kwargs) {
+  StringSink? buf = kwargs["buf"];
+  if (buf != null) {
+    String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+    buf.writeln(line);
+    return;
+  }
+  if (!isDebugMode) return;
+  String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+  print(line);
+});
