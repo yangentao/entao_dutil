@@ -41,8 +41,18 @@ dynamic printX = VarargFunction((args, kwargs) {
   print(line);
 });
 
-// void main() {
-//   var buf = StringBuffer();
-//   printX(1, 2, 3, sep: ", ", buf: buf );
-//   println(buf.toString());
-// }
+dynamic printE = VarargFunction((args, kwargs) {
+  StringBuffer? buf = kwargs["buf"];
+  if (buf != null) {
+    String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+    buf.writeln(line);
+    return;
+  }
+  if (!isDebugMode) return;
+  String line = args.map((e) => e.toString()).join(kwargs["sep"] ?? " ");
+  print(_sgr("31") + line + _sgr("0"));
+});
+
+String _sgr(String code) {
+  return "\u001b[${code}m";
+}

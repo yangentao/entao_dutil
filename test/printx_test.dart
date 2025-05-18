@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   test("printX", () {
+    printE("this is an error", 99);
     printX("abc");  // abc
     printX(1, 2);   // 1 2
     printX([1, 2, 3]);  // [1, 2, 3]

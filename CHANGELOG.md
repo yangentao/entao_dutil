@@ -42,3 +42,6 @@
 * utf16, head
 ## 1.0.16
 * tableData
+
+## 1.1.0
+* remove log

@@ -1,6 +1,4 @@
 void main() {
-  dynamic v = null;
-
   print(prop(null));
   print(prop(2));
   print(prop(1.2));

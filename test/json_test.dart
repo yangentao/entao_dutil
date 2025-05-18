@@ -64,9 +64,9 @@ void main() {
     String text = """{"a":"\\u${Hex.encode(codes[0], bytes: 2)}\\u${Hex.encode(codes[1], bytes: 2)}"}""";
     print(text);
     var m = json.decode(text);
-    println(m["a"]);
+    printX(m["a"]);
     var y = yson.decode(text);
-    println(y["a"]);
+    printX(y["a"]);
 
     String x = yson.encode(y, loose: true);
     print(x);

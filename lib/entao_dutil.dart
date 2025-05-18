@@ -18,7 +18,6 @@ export 'src/ini_file.dart';
 export 'src/intrange.dart';
 export 'src/json.dart';
 export 'src/label_value.dart';
-export 'src/log.dart';
 export 'src/modbus.dart';
 export 'src/msg_center.dart';
 export 'src/notify_value.dart';
