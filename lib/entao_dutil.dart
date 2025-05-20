@@ -22,6 +22,7 @@ export 'src/modbus.dart';
 export 'src/msg_center.dart';
 export 'src/notify_value.dart';
 export 'src/nums.dart';
+export 'src/pagination.dart';
 export 'src/progress.dart';
 export 'src/result.dart';
 export 'src/strings.dart';
