@@ -51,3 +51,6 @@
 
 ## 1.1.2
 * Pagination
+
+## 1.2.0
+* upgrade dart 3.8 
