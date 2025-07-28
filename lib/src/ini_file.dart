@@ -12,7 +12,18 @@ class IniFile {
 
   bool get isNoEmpty => data.isNotEmpty;
 
-  IniFile(this.data);
+  IniFile([Map<String, Map<String, String>>? m]) : data = m ?? {};
+
+  List<IniItem> get items {
+    List<IniItem> ls = [];
+    for (var e in data.entries) {
+      for (var ee in e.value.entries) {
+        var item = IniItem(key: ee.key, value: ee.value, section: e.key);
+        ls.add(item);
+      }
+    }
+    return ls;
+  }
 
   String? get(String key, {String section = ""}) {
     return data[section]?[key];
@@ -20,6 +31,19 @@ class IniFile {
 
   void put(String key, String value, {String section = ""}) {
     data.getOrPut(section, () => {})[key] = value;
+  }
+
+  void putItem(IniItem item) {
+    put(item.key, item.value, section: item.section);
+  }
+
+  static IniFile? tryRead(File file) {
+    try {
+      String s = file.readAsStringSync();
+      return parse(s);
+    } catch (e) {
+      return null;
+    }
   }
 
   static IniFile read(File file) {
