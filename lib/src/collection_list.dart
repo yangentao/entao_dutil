@@ -34,6 +34,12 @@ extension ListSliceEx<T> on List<T> {
 }
 
 extension ListExtensions<E> on List<E> {
+  E get random {
+    if (this.isEmpty) error("List is Empty");
+    if (this.length == 1) return this.first;
+    return this[Rand.next(0, this.length)];
+  }
+
   List<E> operator <<(E e) {
     add(e);
     return this;

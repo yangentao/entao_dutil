@@ -74,10 +74,16 @@ class OSDetect {
 }
 
 class Rand {
+  Rand._();
+
+  static final math.Random _random = math.Random(DateTime.now().milliSeconds1970);
+
   /// [minVal, maxVal)
   static int next(int minVal, int maxVal) {
-    return math.Random().nextInt(maxVal - minVal) + minVal;
+    return _random.nextInt(maxVal - minVal) + minVal;
   }
+
+  static double get nextDouble => _random.nextDouble();
 }
 
 extension CastToExt on Object {
@@ -108,9 +114,7 @@ class DelayCall {
   final VoidFunc _callback;
   int _triggerTime = 0;
 
-  DelayCall({required VoidFunc callback, int delayMills = 500})
-      : _callback = callback,
-        _delayMills = delayMills;
+  DelayCall({required VoidFunc callback, int delayMills = 500}) : _callback = callback, _delayMills = delayMills;
 
   void trigger() {
     _triggerTime = currentMilliSeconds1970;

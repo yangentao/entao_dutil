@@ -1,35 +1,50 @@
+import 'package:collection/collection.dart';
+import 'package:entao_dutil/entao_dutil.dart';
+
 typedef BusCallback = void Function(Object event, Object? arg);
 
 class EventBus {
   EventBus._();
 
-  static final Map<Object, List<BusCallback>> _map = {};
+  static final Map<Object, List<WeakReference<BusCallback>>> _map = {};
 
   static void on(Object event, BusCallback callback) {
     var ls = _map[event];
     if (ls == null) {
-      _map[event] = [callback];
+      _map[event] = [WeakReference(callback)];
     } else {
-      if (!ls.contains(callback)) {
-        ls.add(callback);
+      var a = ls.firstWhereOrNull((e) => callback.identyEqual(e.target));
+      if (a == null) {
+        ls.add(WeakReference(callback));
       }
     }
   }
 
-  static void off(Object event, [BusCallback? callback]) {
-    if (callback == null) {
-      _map.remove(event);
+  static void off({Object? event, BusCallback? callback}) {
+    if (event == null) {
+      if (callback == null) {
+        return;
+      } else {
+        for (List<WeakReference<BusCallback>> ls in _map.values) {
+          ls.removeWhere((e) => callback.identyEqual(e.target));
+        }
+      }
     } else {
-      _map[event]?.remove(callback);
+      if (callback == null) {
+        _map.remove(event);
+      } else {
+        _map[event]?.removeWhere((e) => callback.identyEqual(e.target));
+      }
     }
   }
 
   static void emit(Object event, [Object? arg]) {
-    List<BusCallback>? oldList = _map[event];
+    List<WeakReference<BusCallback>>? oldList = _map[event];
     if (oldList == null) return;
-    List<BusCallback> ls = List<BusCallback>.from(oldList);
-    for (BusCallback c in ls) {
-      c.call(event, arg);
+    oldList.removeWhere((e) => e.target == null);
+    List<WeakReference<BusCallback>> ls = List<WeakReference<BusCallback>>.from(oldList);
+    for (WeakReference<BusCallback> c in ls) {
+      c.target?.call(event, arg);
     }
   }
 }
