@@ -1,15 +1,16 @@
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:println/println.dart';
 import 'package:test/test.dart';
 
 void main() {
   test("printX", () {
-    printE("this is an error", 99);
-    printX("abc");  // abc
-    printX(1, 2);   // 1 2
-    printX([1, 2, 3]);  // [1, 2, 3]
-    printX(1, "a", "b", sep: ", "); // 1, a, b
+    println("this is an error", 99);
+    println("abc");  // abc
+    println(1, 2);   // 1 2
+    println([1, 2, 3]);  // [1, 2, 3]
+    println(1, "a", "b", sep: ", "); // 1, a, b
     StringBuffer buf = StringBuffer();
-    printX(1, "a", "b", sep: ", ", buf: buf );
+    println(1, "a", "b", sep: ", ", buf: buf );
     print(buf.toString()); // 1, a, b
   });
 }

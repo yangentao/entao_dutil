@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:println/println.dart';
 
 class TcpClient {
   Socket? socket;
@@ -43,19 +44,19 @@ class TcpClient {
       return false;
     }
     try {
-      printX("connect: ", host, port);
+      println("connect: ", host, port);
       socket = await Socket.connect(host, port, timeout: timeout);
       socket?.encoding = encoding;
       socket?.cast<List<int>>().listen(_onTcpData, onDone: _onTcpClosed, onError: _onTcpError);
       return true;
     } on OSError catch (e) {
-      printE(e.toString());
+      println(e.toString());
       error = e;
     } on SocketException catch (e) {
-      printE(e.toString());
+      println(e.toString());
       error = e;
     } catch (e) {
-      printE(e);
+      println(e);
       error = e;
     }
     return false;
@@ -67,7 +68,7 @@ class TcpClient {
 
   void _onTcpError(dynamic e) {
     error = e;
-    printE("tcp error: ${e?.toString()}");
+    println("tcp error: ${e?.toString()}");
     if (socket != null) {
       socket?.destroy();
       socket = null;
@@ -76,7 +77,7 @@ class TcpClient {
   }
 
   void _onTcpClosed() {
-    printX("tcp closed");
+    println("tcp closed");
     if (socket != null) {
       socket?.destroy();
       socket = null;

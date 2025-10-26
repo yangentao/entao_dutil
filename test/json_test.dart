@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:println/println.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -64,9 +65,9 @@ void main() {
     String text = """{"a":"\\u${Hex.encode(codes[0], bytes: 2)}\\u${Hex.encode(codes[1], bytes: 2)}"}""";
     print(text);
     var m = json.decode(text);
-    printX(m["a"]);
+    println(m["a"]);
     var y = yson.decode(text);
-    printX(y["a"]);
+    println(y["a"]);
 
     String x = yson.encode(y, loose: true);
     print(x);

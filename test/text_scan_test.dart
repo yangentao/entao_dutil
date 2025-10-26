@@ -1,4 +1,5 @@
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:println/println.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -40,6 +41,6 @@ void main() {
     TextScanner ts = TextScanner(text);
     print(ts.tryExpectAnyString(["tt", "ff", "de"]));
     ts.printLastBuf();
-    printX(ts.position);
+    println(ts.position);
   });
 }

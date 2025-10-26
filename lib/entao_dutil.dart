@@ -3,6 +3,7 @@
 ///
 library;
 
+export 'src/trans_call.dart';
 export 'src/basic.dart';
 export 'src/binders.dart';
 export 'src/bits.dart';
@@ -28,5 +29,4 @@ export 'src/result.dart';
 export 'src/strings.dart';
 export 'src/tcp_client.dart';
 export 'src/text_scanner.dart';
-export 'src/vararg_call.dart';
 export 'src/yson.dart';

@@ -1,4 +1,5 @@
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:println/println.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
 
@@ -14,11 +15,11 @@ void main() {
   dept=dev
   """;
   IniFile ini = IniFile.parse(s);
-  printX(ini);
-  printX();
+  println(ini);
+  println();
   ini.put("dept", "test", section: "group");
   String out = ini.toString();
-  printX(out);
+  println(out);
 
   test("Ini file test", () {
     expect("google.com", ini.get("host"));

@@ -40,6 +40,8 @@ typedef ListString = List<String>;
 
 typedef PropMap = Map<String, dynamic>;
 
+typedef AnyMap = Map<String, dynamic>;
+
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
 const bool isDebugMode = !isReleaseMode && !isProfileMode;
