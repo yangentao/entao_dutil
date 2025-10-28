@@ -94,9 +94,12 @@ extension CastToExt on Object {
   }
 
   T? castTo<T>() {
-    if (this is T) return this as T;
-    return null;
+    return this is T ? this as T : null;
   }
+}
+
+T? castValue<T>(Object? value) {
+  return value is T ? value : null;
 }
 
 Future<void> delayMills(int millSeconds, [FutureOr<void> Function()? callback]) {

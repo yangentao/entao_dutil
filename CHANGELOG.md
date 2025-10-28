@@ -64,5 +64,8 @@
 ## 1.2.4
 * List.random
 
+## 1.2.6
+* castValue
+
 ## 1.2.5
 * println, any_call
