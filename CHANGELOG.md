@@ -69,3 +69,6 @@
 
 ## 1.2.5
 * println, any_call
+
+## 1.2.7
+* println
