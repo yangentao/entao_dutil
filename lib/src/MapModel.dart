@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-
-
 class MapModel {
   Map<String, dynamic> modelMap;
 

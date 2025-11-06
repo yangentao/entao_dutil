@@ -3,6 +3,7 @@
 ///
 library;
 
+export 'src/MapModel.dart';
 export 'src/basic.dart';
 export 'src/binders.dart';
 export 'src/bits.dart';
@@ -16,7 +17,7 @@ export 'src/eventbus.dart';
 export 'src/hex.dart';
 export 'src/ini_file.dart';
 export 'src/intrange.dart';
-export 'src/json.dart';
+export 'src/json_result.dart';
 export 'src/label_value.dart';
 export 'src/modbus.dart';
 export 'src/msg_center.dart';

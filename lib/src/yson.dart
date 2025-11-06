@@ -1,7 +1,6 @@
 import 'package:entao_dutil/src/basic.dart';
 import 'package:entao_dutil/src/char_code.dart';
 import 'package:entao_dutil/src/collection.dart';
-import 'package:entao_dutil/src/json.dart';
 import 'package:entao_dutil/src/strings.dart';
 
 import 'text_scanner.dart';
@@ -44,9 +43,9 @@ class _LooseYsonParser extends _YsonParser {
   static final Set<int> _TRAIL = {CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF, CharCode.COMMA, CharCode.SEMI};
 
   @override
-  JsonMap parseObject() {
+  Map<String, dynamic> parseObject() {
     _ts.skipWhites();
-    JsonMap map = {};
+    Map<String, dynamic> map = {};
     _ts.expectChar(CharCode.LCUB);
     _ts.skipWhites();
     while (_ts.nowChar != CharCode.RCUB) {
@@ -67,9 +66,9 @@ class _LooseYsonParser extends _YsonParser {
   }
 
   @override
-  JsonList parseArray() {
+  List<dynamic> parseArray() {
     _ts.skipWhites();
-    JsonList list = [];
+    List<dynamic> list = [];
     _ts.expectChar(CharCode.LSQB);
     _ts.skipWhites();
     while (_ts.nowChar != CharCode.RSQB) {
@@ -127,9 +126,9 @@ class _YsonParser {
     }
   }
 
-  JsonMap parseObject() {
+  Map<String, dynamic> parseObject() {
     _ts.skipWhites();
-    JsonMap map = {};
+    Map<String, dynamic> map = {};
     _ts.expectChar(CharCode.LCUB);
     _ts.skipWhites();
     while (_ts.nowChar != CharCode.RCUB) {
@@ -149,9 +148,9 @@ class _YsonParser {
     return map;
   }
 
-  JsonList parseArray() {
+  List<dynamic> parseArray() {
     _ts.skipWhites();
-    JsonList list = [];
+    List<dynamic> list = [];
     _ts.expectChar(CharCode.LSQB);
     _ts.skipWhites();
     while (_ts.nowChar != CharCode.RSQB) {
