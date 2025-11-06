@@ -35,6 +35,10 @@ class JsonResult extends MapModel {
     errorHare("NOT a map");
   }
 
+  T dataModel<T>(T Function(Map<String, dynamic>) maper) {
+    return maper(data);
+  }
+
   List<T> dataList<T>([T Function(dynamic)? maper]) {
     if (data is List<dynamic>) {
       if (maper == null) {

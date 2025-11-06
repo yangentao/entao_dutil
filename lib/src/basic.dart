@@ -38,9 +38,8 @@ typedef ListInt = List<int>;
 typedef ListDouble = List<double>;
 typedef ListString = List<String>;
 
-typedef PropMap = Map<String, dynamic>;
-
 typedef AnyMap = Map<String, dynamic>;
+typedef AnyList = List<dynamic>;
 
 const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
@@ -119,7 +118,9 @@ class DelayCall {
   final VoidFunc _callback;
   int _triggerTime = 0;
 
-  DelayCall({required VoidFunc callback, int delayMills = 500}) : _callback = callback, _delayMills = delayMills;
+  DelayCall({required VoidFunc callback, int delayMills = 500})
+      : _callback = callback,
+        _delayMills = delayMills;
 
   void trigger() {
     _triggerTime = currentMilliSeconds1970;
@@ -190,7 +191,7 @@ Never errorHare(String? msg) {
   throw HareException(msg);
 }
 
-extension PropMapExt<T extends Object> on PropMap {
+extension PropMapExt<T extends Object> on AnyMap {
   AnyProp<T> propAny(String key, {T? missValue}) {
     return AnyProp(map: this, key: key, missValue: missValue);
   }
@@ -201,11 +202,11 @@ extension PropMapExt<T extends Object> on PropMap {
 }
 
 class AnyProp<T extends Object> {
-  final PropMap _map;
+  final AnyMap _map;
   final String key;
   final T? missValue;
 
-  AnyProp({required PropMap map, required this.key, this.missValue}) : _map = map;
+  AnyProp({required AnyMap map, required this.key, this.missValue}) : _map = map;
 
   T? get value {
     return _map[key] ?? missValue;
@@ -232,11 +233,11 @@ class AnyProp<T extends Object> {
 }
 
 class SomeProp<T extends Object> {
-  final PropMap _map;
+  final AnyMap _map;
   final String key;
   final T missValue;
 
-  SomeProp({required PropMap map, required this.key, required this.missValue}) : _map = map;
+  SomeProp({required AnyMap map, required this.key, required this.missValue}) : _map = map;
 
   T get value {
     return _map[key] ?? missValue;

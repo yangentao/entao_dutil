@@ -1,15 +1,13 @@
 name: entao_dutil
 description: Utils for dart.
-version: 2.0.3
+version: 2.0.5
 repository: https://github.com/yangentao/entao_dutil
 homepage: https://github.com/yangentao/entao_dutil
 
 environment:
   sdk: ^3.5.0
 
-# Add regular dependencies here.
 dependencies:
-  # path: ^1.8.0
   intl: ^0.20.2
   uuid: ^4.5.2
   collection: ^1.19.1

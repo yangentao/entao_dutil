@@ -118,3 +118,6 @@
 
 ## 2.0.3
 * JsonResult.message
+
+## 2.0.5
+* AnyList
