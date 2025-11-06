@@ -75,3 +75,5 @@
 
 ## 1.2.8
 * SingleResult and ItemsResult
+## 1.2.9
+* SingleResult and ItemsResult
