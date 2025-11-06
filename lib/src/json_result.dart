@@ -15,7 +15,7 @@ class JsonResult extends MapModel {
 
   late final int code = get("code") ?? -9999;
 
-  late final String? message = get("message");
+  late final String? message = get("msg") ?? get("message");
 
   late final dynamic data = get("data");
 

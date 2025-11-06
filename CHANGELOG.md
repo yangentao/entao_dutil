@@ -115,3 +115,6 @@
 
 ## 2.0.2
 * JsonResult.code
+
+## 2.0.2
+* JsonResult.message
