@@ -109,3 +109,6 @@
 ## 2.0.0
 
 * JsonResult
+
+## 2.0.1
+* remove DataResult, ListResult

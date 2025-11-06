@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:entao_dutil/entao_dutil.dart';
 
-class JsonResultX extends MapModel {
-  JsonResultX(super.modelMap);
+class JsonResult extends MapModel {
+  JsonResult(super.modelMap);
 
-  static JsonResultX from(String text) {
-    return JsonResultX(json.decode(text));
+  static JsonResult from(String text) {
+    return JsonResult(json.decode(text));
   }
 
   bool get success => code == 0;

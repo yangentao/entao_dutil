@@ -25,7 +25,6 @@ export 'src/notify_value.dart';
 export 'src/nums.dart';
 export 'src/pagination.dart';
 export 'src/progress.dart';
-export 'src/result.dart';
 export 'src/results.dart';
 export 'src/strings.dart';
 export 'src/tcp_client.dart';
