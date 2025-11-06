@@ -120,4 +120,4 @@
 * JsonResult.message
 
 ## 2.0.5
-* AnyList
+* AnyList.
