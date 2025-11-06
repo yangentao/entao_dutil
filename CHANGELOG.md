@@ -112,3 +112,6 @@
 
 ## 2.0.1
 * remove DataResult, ListResult
+
+## 2.0.2
+* JsonResult.code

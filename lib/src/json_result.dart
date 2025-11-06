@@ -13,7 +13,7 @@ class JsonResult extends MapModel {
 
   bool get failed => code != 0;
 
-  late final int code = get("code");
+  late final int code = get("code") ?? -9999;
 
   late final String? message = get("message");
 
