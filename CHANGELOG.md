@@ -72,3 +72,6 @@
 
 ## 1.2.7
 * println
+
+## 1.2.8
+* SingleResult and ItemsResult

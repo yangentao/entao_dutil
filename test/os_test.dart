@@ -1,4 +1,3 @@
-import 'package:entao_dutil/entao_dutil.dart';
 import 'package:os_detect/os_detect.dart' as OS;
 import 'package:println/println.dart';
 

@@ -1,3 +1,4 @@
+@Deprecated("Use SingleResult instead.")
 class DataResult<T> extends BaseResult {
   final T? data;
 
@@ -26,6 +27,7 @@ class DataResult<T> extends BaseResult {
         super(success: false);
 }
 
+@Deprecated("Use ItemsResult instead.")
 class ListResult<T> extends BaseResult {
   final List<T> items;
   final int? total;
@@ -73,6 +75,7 @@ class ListResult<T> extends BaseResult {
   int get totalOrSize => total ?? size;
 }
 
+@Deprecated("Use SingleResult instead.")
 class BaseResult {
   final dynamic rawResult;
   final dynamic error;
