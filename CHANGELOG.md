@@ -121,3 +121,6 @@
 
 ## 2.0.5
 * AnyList.
+
+## 2.0.6
+* nullable string

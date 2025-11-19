@@ -45,6 +45,12 @@ const bool isReleaseMode = bool.fromEnvironment('dart.vm.product');
 const bool isProfileMode = bool.fromEnvironment('dart.vm.profile');
 const bool isDebugMode = !isReleaseMode && !isProfileMode;
 
+const int GB = 1024 * 1024 * 1024;
+const int MB = 1024 * 1024;
+const int KB = 1024;
+
+int get millsNow => DateTime.now().millisecondsSinceEpoch;
+
 extension LetBlock<T> on T {
   R let<R>(R Function(T e) block) => block(this);
 
@@ -99,6 +105,10 @@ extension CastToExt on Object {
 
 T? castValue<T>(Object? value) {
   return value is T ? value : null;
+}
+
+Future<void> asyncCall(VoidCallback callback) async {
+  callback();
 }
 
 Future<void> delayMills(int millSeconds, [FutureOr<void> Function()? callback]) {
@@ -278,5 +288,34 @@ mixin MixCompare<T> implements Comparable<T> {
 
   bool operator >=(T other) {
     return this.compareTo(other) >= 0;
+  }
+}
+
+extension IntSizeDisplay on int {
+  String get sizeDisplay {
+    if (this > GB) {
+      return (this * 1.0 / GB).formated("0.0G");
+    }
+    if (this > MB) {
+      return (this * 1.0 / MB).formated("0.0M");
+    }
+    if (this > KB) {
+      return (this * 1.0 / KB).formated("0.0K");
+    }
+    return "${this}b";
+  }
+}
+
+class Tick {
+  int lastTime = millsNow;
+
+  int get current => millsNow - lastTime;
+
+  int tick([bool output = true]) {
+    var now = millsNow;
+    var delta = now - lastTime;
+    lastTime = now;
+    if (output) print(delta);
+    return delta;
   }
 }
