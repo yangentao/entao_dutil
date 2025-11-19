@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 class MapModel {
-  Map<String, dynamic> modelMap;
+  Map<String, dynamic> model;
 
-  MapModel(this.modelMap);
+  MapModel(this.model);
 
   dynamic operator [](String key) {
     return get(key);
@@ -14,21 +14,21 @@ class MapModel {
   }
 
   T? get<T>(String key) {
-    var v = modelMap[key];
-    return _checkNum(v);
+    var v = model[key];
+    return _checkNum<T>(v);
   }
 
   void set<T>(String key, T? value) {
-    modelMap[key] = value;
+    model[key] = value;
   }
 
   String toJson() {
-    return json.encode(modelMap);
+    return json.encode(model);
   }
 
   @override
   String toString() {
-    return json.encode(modelMap);
+    return json.encode(model);
   }
 }
 

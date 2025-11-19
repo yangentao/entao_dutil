@@ -11,6 +11,16 @@ import 'collection.dart';
 
 const Uuid _uuid = Uuid();
 
+extension StringNullableExt on String? {
+  bool get nullOrEmpty => this == null || this!.isEmpty;
+
+  bool get nullOrBlank => this == null || this!.trim().isEmpty;
+
+  bool get notBlank => this != null && this!.trim().isNotEmpty;
+
+  bool get notEmpty => this != null && this!.isNotEmpty;
+}
+
 String uuidString({bool sep = false}) {
   String s = _uuid.v4();
   if (sep) return s;
