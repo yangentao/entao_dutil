@@ -17,7 +17,6 @@ export 'src/en_config.dart';
 export 'src/eventbus.dart';
 export 'src/hex.dart';
 export 'src/ini_file.dart';
-export 'src/intrange.dart';
 export 'src/json_result.dart';
 export 'src/label_value.dart';
 export 'src/modbus.dart';

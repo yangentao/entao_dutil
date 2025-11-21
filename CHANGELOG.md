@@ -127,3 +127,6 @@
 
 ## 2.0.7
 * add Pooled.dart
+
+# 2.0.8
+* remove intrange

@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:entao_dutil/src/collection.dart';
+import 'package:entao_range/entao_range.dart';
 
 import 'basic.dart';
-import 'intrange.dart';
 
 extension ListSliceEx<T> on List<T> {
   T? get second => this.getOr(1);
@@ -30,7 +30,7 @@ extension ListSliceEx<T> on List<T> {
     return this.removeAt(idx);
   }
 
-  IntRange get indexes => length.indexes;
+  OpenRange get indexes => length.indexes;
 }
 
 extension ListExtensions<E> on List<E> {
