@@ -4,6 +4,7 @@
 library;
 
 export 'src/MapModel.dart';
+export 'src/Pooled.dart';
 export 'src/basic.dart';
 export 'src/binders.dart';
 export 'src/bits.dart';

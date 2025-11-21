@@ -124,3 +124,6 @@
 
 ## 2.0.6
 * nullable string
+
+## 2.0.7
+* add Pooled.dart
