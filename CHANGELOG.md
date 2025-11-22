@@ -111,22 +111,33 @@
 * JsonResult
 
 ## 2.0.1
+
 * remove DataResult, ListResult
 
 ## 2.0.2
+
 * JsonResult.code
 
 ## 2.0.3
+
 * JsonResult.message
 
 ## 2.0.5
+
 * AnyList.
 
 ## 2.0.6
+
 * nullable string
 
 ## 2.0.7
+
 * add Pooled.dart
 
 # 2.0.8
+
 * remove intrange
+
+# 2.0.9
+
+* progress

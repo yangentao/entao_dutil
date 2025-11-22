@@ -2,16 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'basic.dart';
+
 typedef ProgressCallback = void Function({int total, int current});
 
 class ProgressPublish {
   ProgressCallback? onProgress;
+  final int delay; //mill sec
   final int total;
   int current = 0;
   int _preTime = 0;
-  final int delay; //mill sec
 
-  ProgressPublish(this.total, this.onProgress, {int? delayMS}) : delay = delayMS ?? 50;
+  ProgressPublish(int total, this.onProgress, {int? delayMS})
+      : total = total <= 0 ? 1 : total,
+        delay = delayMS ?? 100;
 
   void add(int count) {
     current += count;
@@ -20,7 +24,11 @@ class ProgressPublish {
     fire = fire || (currTime - _preTime >= delay);
     if (fire) {
       _preTime = currTime;
-      onProgress?.call(total: total, current: current);
+      if (onProgress != null) {
+        asyncCall(() {
+          onProgress?.call(total: total, current: current);
+        });
+      }
     }
   }
 }
@@ -42,7 +50,7 @@ extension StreamReadBytesExt on Stream<List<int>> {
   Future<Uint8List> allBytes() async {
     var completer = Completer<Uint8List>();
     var sink = ByteConversionSink.withCallback((bytes) => completer.complete(Uint8List.fromList(bytes)));
-    listen((data) {
+    this.listen((data) {
       sink.add(data);
     }, onError: completer.completeError, onDone: sink.close, cancelOnError: true);
     return completer.future;

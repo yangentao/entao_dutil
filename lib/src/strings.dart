@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:entao_dutil/src/collection_list.dart';
 import 'package:uuid/uuid.dart';
 
-import 'basic.dart';
 import 'collection.dart';
 
 const Uuid _uuid = Uuid();
@@ -77,13 +76,13 @@ extension SymbolEx on Symbol {
   }
 }
 
-extension ObjectStringKey on Object {
-  String get stringKey {
-    if (this is String) return this as String;
-    if (this is Symbol) return (this as Symbol).stringValue;
-    error("NOT a String OR Symbol");
-  }
-}
+// extension ObjectStringKey on Object {
+//   String get stringKey {
+//     if (this is String) return this as String;
+//     if (this is Symbol) return (this as Symbol).stringValue;
+//     error("NOT a String OR Symbol");
+//   }
+// }
 
 extension Uint8List2String on Uint8List {
   String utf8String() => utf8.decode(this);
