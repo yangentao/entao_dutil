@@ -134,10 +134,13 @@
 
 * add Pooled.dart
 
-# 2.0.8
+## 2.0.8
 
 * remove intrange
 
-# 2.0.9
+## 2.0.9
 
 * progress
+
+## 2.0.10
+* add mergeCall()

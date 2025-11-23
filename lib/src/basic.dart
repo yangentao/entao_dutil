@@ -123,6 +123,33 @@ Future<void> postAction(FutureOr<void> Function() callback) {
   return Future.delayed(Duration(milliseconds: 0), callback);
 }
 
+Map<Object, MapEntry<int, VoidCallback>> _mergeMap = {};
+
+void mergeCall(Object key, VoidCallback callback, {int delay = 1000, bool interval = false}) {
+  if (_mergeMap.containsKey(key)) {
+    _mergeMap[key] = MapEntry(millsNow, callback);
+    return;
+  }
+  _mergeMap[key] = MapEntry(millsNow, callback);
+
+  void invokeCallback() {
+    if (interval) {
+      _mergeMap.remove(key)?.value.call();
+    } else {
+      MapEntry<int, VoidCallback>? e = _mergeMap[key];
+      if (e == null) return;
+      if (e.key + delay <= millsNow) {
+        _mergeMap.remove(key)?.value.call();
+      } else {
+        Future.delayed(Duration(milliseconds: delay), invokeCallback);
+      }
+    }
+  }
+
+  Future.delayed(Duration(milliseconds: delay), invokeCallback);
+}
+
+@Deprecated("use mergeCall() instead.")
 class DelayCall {
   final int _delayMills;
   final VoidFunc _callback;
