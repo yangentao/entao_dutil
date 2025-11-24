@@ -144,3 +144,6 @@
 
 ## 2.0.10
 * add mergeCall()
+
+## 2.0.11
+* mergeCall delay

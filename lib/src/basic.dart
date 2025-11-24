@@ -138,10 +138,11 @@ void mergeCall(Object key, VoidCallback callback, {int delay = 1000, bool interv
     } else {
       MapEntry<int, VoidCallback>? e = _mergeMap[key];
       if (e == null) return;
-      if (e.key + delay <= millsNow) {
+      int leftMills = e.key + delay - millsNow;
+      if (leftMills <= 0) {
         _mergeMap.remove(key)?.value.call();
       } else {
-        Future.delayed(Duration(milliseconds: delay), invokeCallback);
+        Future.delayed(Duration(milliseconds: leftMills), invokeCallback);
       }
     }
   }
