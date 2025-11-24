@@ -25,7 +25,7 @@ class yson {
         if (loose) return "{${map.entries.map((e) => "${e.key}:${encode(e.value, loose: loose)}").join(", ")}}";
         return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value, loose: loose)}").join(", ")}}";
       default:
-        error("Unknown type: $value");
+        raise("Unknown type: $value");
     }
   }
 

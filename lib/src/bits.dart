@@ -22,7 +22,7 @@ extension IntExts on int {
     return this & ~(1 << bit);
   }
 
-  int bitSet01(int bit, int value) {
+  int bitSet(int bit, int value) {
     assert(value == 0 || value == 1);
     if (value == 0) {
       return bitSet0(bit);

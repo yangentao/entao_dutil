@@ -166,6 +166,12 @@ class TextScanner {
     throw Exception("$msg. $position, $leftText");
   }
 
+  String get rest {
+    if (position >= 0 && position < text.length) return text.substring(position).head(64);
+    return text.tail(64);
+  }
+
+  @Deprecated("use 'rest' instead")
   String get leftText {
     if (position >= 0 && position < text.length) return text.substring(position).head(64);
     return text.tail(64);

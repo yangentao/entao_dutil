@@ -678,7 +678,7 @@ abstract class EnValue {
         }
       case EnList el:
         int? idx = key is int ? key : (key is String ? key.toInt : null);
-        if (idx == null) error("index error: $key");
+        if (idx == null) raise("index error: $key");
         if (value == null) {
           el.data[idx] = EnNull.inst;
         } else {

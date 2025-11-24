@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:entao_dutil/src/collection.dart';
-import 'package:entao_range/entao_range.dart';
 
 import 'basic.dart';
 
@@ -29,13 +28,11 @@ extension ListSliceEx<T> on List<T> {
     if (idx < 0) return null;
     return this.removeAt(idx);
   }
-
-  OpenRange get indexes => length.indexes;
 }
 
 extension ListExtensions<E> on List<E> {
   E get random {
-    if (this.isEmpty) error("List is Empty");
+    if (this.isEmpty) raise("List is Empty");
     if (this.length == 1) return this.first;
     return this[Rand.next(0, this.length)];
   }
@@ -69,7 +66,7 @@ extension ListExtensions<E> on List<E> {
 
   List<E> gaped(E Function() block, {bool start = false, bool end = false}) {
     List<E> ls = [];
-    for (int i in length.indexes) {
+    for (int i = 0; i < length; ++i) {
       if (i == 0 && start) ls << block();
       if (i != 0) {
         ls << block();

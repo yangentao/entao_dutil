@@ -46,7 +46,7 @@ String blankOr(String? a, String? b, [String miss = ""]) {
   return miss;
 }
 
-// TODO windows
+// TODO windows, use path package
 String joinPath(String a, String b, {String sep = "/"}) {
   if (a.endsWith(sep)) {
     return b.startsWith(sep) ? a + b.substring(1) : a + b;
@@ -92,7 +92,7 @@ extension ListInt2String on List<int> {
   String utf8String() => utf8.decode(this);
 }
 
-Map<String, V> mapIgnoreCase<V>() {
+Map<String, V> ICaseMap<V>() {
   return SplayTreeMap(IgnoreCase.compare);
 }
 

@@ -48,7 +48,7 @@ class Modbus {
       if (code != 0) return req.error(code);
       return req.response();
     }
-    fatal("Invalid Request.");
+    raise("Invalid Request.");
   }
 
   static BusRequest? parseRequest(List<int> data) {
@@ -103,7 +103,7 @@ abstract class BusRequest {
     return ls;
   }
 
-  int get area => switch (action) { 1 => 0, 2 => 1, 4 => 3, 3 => 4, 5 => 0, 6 => 4, 0x0F => 0, 0x10 => 4, _ => fatal("Bad Action") };
+  int get area => switch (action) { 1 => 0, 2 => 1, 4 => 3, 3 => 4, 5 => 0, 6 => 4, 0x0F => 0, 0x10 => 4, _ => raise("Bad Action") };
 
   //40001
   int get address => area * 10000 + register + 1;
@@ -199,7 +199,7 @@ class BusReadRequest extends BusRequest {
         }
         break;
       default:
-        error("Bad Action");
+        raise("Bad Action");
     }
     int a = crcModbus(ls);
     ls << a.low0;

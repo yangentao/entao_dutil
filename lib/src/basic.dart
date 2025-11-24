@@ -61,8 +61,8 @@ extension LetBlock<T> on T {
 }
 
 class PairVar<A, B> {
-  A first;
-  B second;
+  final A first;
+  final B second;
 
   PairVar(this.first, this.second);
 }
@@ -150,29 +150,6 @@ void mergeCall(Object key, VoidCallback callback, {int delay = 1000, bool interv
   Future.delayed(Duration(milliseconds: delay), invokeCallback);
 }
 
-@Deprecated("use mergeCall() instead.")
-class DelayCall {
-  final int _delayMills;
-  final VoidFunc _callback;
-  int _triggerTime = 0;
-
-  DelayCall({required VoidFunc callback, int delayMills = 500})
-      : _callback = callback,
-        _delayMills = delayMills;
-
-  void trigger() {
-    _triggerTime = currentMilliSeconds1970;
-    Future.delayed(Duration(milliseconds: _delayMills), _invoke);
-  }
-
-  void _invoke() {
-    int now = currentMilliSeconds1970;
-    if (now >= _triggerTime + _delayMills) {
-      _callback();
-    }
-  }
-}
-
 extension UriAppendArgumentsExt on Uri {
   /// 返回新的Uri
   Uri appendParams(Map<String, String> args) {
@@ -205,28 +182,18 @@ class ResultException implements Exception {
 }
 
 class HareException implements Exception {
-  final dynamic message;
+  final Object message;
 
-  HareException([this.message]);
+  HareException(this.message);
 
   @override
   String toString() {
-    Object? message = this.message;
-    if (message == null) return "HareError";
-    return "HareError: $message";
+    return "HareException: $message";
   }
 }
 
-Never fatal(String? msg) {
-  throw Exception(msg);
-}
-
-Never error(String? msg) {
-  throw Exception(msg);
-}
-
-Never errorHare(String? msg) {
-  throw HareException(msg);
+Never raise(Object message) {
+  throw HareException(message);
 }
 
 extension PropMapExt<T extends Object> on AnyMap {

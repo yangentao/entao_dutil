@@ -32,7 +32,7 @@ class JsonResult extends MapModel {
 
   Map<String, dynamic> dataMap<T>() {
     if (data is Map<String, dynamic>) return data;
-    errorHare("NOT a map");
+    raise("NOT a map");
   }
 
   T dataModel<T>(T Function(Map<String, dynamic>) maper) {
@@ -47,14 +47,14 @@ class JsonResult extends MapModel {
         return (data as List<dynamic>).mapList((e) => maper(e));
       }
     }
-    errorHare("Not a list");
+    raise("Not a list");
   }
 
   List<T> dataListModel<T>(T Function(Map<String, dynamic>) maper) {
     if (data is List<dynamic>) {
       return (data as List<dynamic>).mapList((e) => maper(e));
     }
-    errorHare("Not a list");
+    raise("Not a list");
   }
 
   //  ["id", "name", "score"]

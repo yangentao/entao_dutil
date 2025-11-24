@@ -143,7 +143,22 @@
 * progress
 
 ## 2.0.10
+
 * add mergeCall()
 
 ## 2.0.11
+
 * mergeCall delay
+
+## 2.1.0
+* rename CommonError.rawError to CommonError.error
+* remove error()
+* remove fatal()
+* remove errorHare()
+* add raise()
+* remove DelayCall, use mergeCall instead.
+* rename int.bitSet01() to int.bitSet()
+* Map.getOrPut(), allow null value.
+* rename  mapIgnoreCase() to ICaseMap()
+* remove entao_range dependice
+* add MsgCall

@@ -1,9 +1,10 @@
 class CommonError {
   final int? code;
   final String? message;
-  final dynamic rawError;
+  final Object? data;
+  final dynamic error;
 
-  CommonError({this.code, this.message, this.rawError});
+  CommonError({this.code, this.message, this.error, this.data});
 }
 
 class CommonErrorValue {
@@ -28,7 +29,7 @@ class SingleResult<T> extends CommonErrorValue {
 
   SingleResult.success(this.value, {super.rawValue}) : super(error: null);
 
-  SingleResult.failed({int? code, String? message, dynamic rawError}) : super(error: CommonError(code: code, message: message, rawError: rawError), rawValue: null);
+  SingleResult.failed({int? code, String? message, dynamic rawError}) : super(error: CommonError(code: code, message: message, error: rawError), rawValue: null);
 }
 
 class ItemsResult<T> extends CommonErrorValue {
@@ -43,7 +44,7 @@ class ItemsResult<T> extends CommonErrorValue {
   ItemsResult.failed({int? code, String? message, dynamic rawError})
       : total = null,
         offset = null,
-        super(error: CommonError(code: code, message: message, rawError: rawError), rawValue: null);
+        super(error: CommonError(code: code, message: message, error: rawError), rawValue: null);
 
   int get size => items.length;
 

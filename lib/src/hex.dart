@@ -1,4 +1,4 @@
-import 'package:entao_dutil/src/collection.dart';
+
 
 // void main() {
 //   print(Hex.encodeByte(0x10));
@@ -43,7 +43,12 @@ class Hex {
   }
 
   static String encodeBytes(List<int> data) {
-    return data.mapList((e) => encodeByte(e)).join(" ");
+    List<int> codes = [];
+    for (int n in data) {
+      codes.add(_hex4(n >> 4));
+      codes.add(_hex4(n));
+    }
+    return String.fromCharCodes(codes);
   }
 
   static String encode(int value, {int bytes = 0}) {
