@@ -162,3 +162,6 @@
 * rename  mapIgnoreCase() to ICaseMap()
 * remove entao_range dependice
 * add MsgCall
+
+## 2.1.1
+* add XResult
