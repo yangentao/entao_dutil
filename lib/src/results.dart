@@ -7,6 +7,7 @@ class CommonError {
   CommonError({this.code, this.message, this.error, this.data});
 }
 
+
 class CommonErrorValue {
   final CommonError? error;
   final dynamic rawValue;
