@@ -1,14 +1,18 @@
 import 'package:entao_dutil/entao_dutil.dart';
+import 'package:entao_dutil/src/string_escape.dart';
 
 void main() {
-  String s = """
-   {
-   "name":"yang"
-   "age": 33
-   }
-   """;
-  String b = """[1111,2222,3333,4444,5555,]""";
-  dynamic v = yson.decode(b, loose: true);
-  String j = yson.encode(v, loose: true, prety: true);
-  print(j);
+  String s = unescapeCharCodes("He\\nllo\\uD83C\\uDF0DOK".codeUnits, map: {
+    CharCode.SQUOTE: CharCode.SQUOTE,
+    CharCode.BSLASH: CharCode.BSLASH,
+    CharCode.SLASH: CharCode.SLASH,
+    CharCode.b: CharCode.BS,
+    CharCode.f: CharCode.FF,
+    CharCode.n: CharCode.LF,
+    CharCode.r: CharCode.CR,
+    CharCode.t: CharCode.HTAB,
+  });
+  print(s);
+  // He
+  // llo🌍OK
 }
