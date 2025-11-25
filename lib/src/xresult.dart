@@ -27,6 +27,15 @@ class XError {
 }
 
 extension ResultExtendsAny on XResult {
+  /// ["id", "name", "score"]
+  /// [1000, "Tom", 90]
+  /// [1001, "Jerry", 80]
+  /// like csv format, first line is column names , rest is data
+  List<R> table<R>(R Function(Map<String, dynamic>) itemMaper) {
+    List<List<dynamic>> rows = list();
+    return _dataTableFromList(rows: rows, maper: itemMaper);
+  }
+
   List<R> listModel<R>(R Function(Map<String, dynamic>) mapper) {
     if (success) {
       if (null is R && value == null) return [];
@@ -90,4 +99,23 @@ extension ResultExtendsAny on XResult {
     }
     return XFailure(failure);
   }
+}
+
+//  ["id", "name", "score"]
+//  [1000, "Tom", 90]
+//  [1001, "Jerry", 80]
+/// 第一行是列名, 第二行开始是数据, 类似csv格式
+List<T> _dataTableFromList<T>({required List<List<dynamic>> rows, required T Function(Map<String, dynamic>) maper}) {
+  if (rows.length <= 1) return [];
+  List<String> rowKey = rows.first.map((e) => e as String).toList();
+  List<T> models = [];
+  for (int i = 1; i < rows.length; ++i) {
+    Map<String, dynamic> map = {};
+    List<dynamic> row = rows[i];
+    for (int c = 0; c < rowKey.length; ++c) {
+      map[rowKey[c]] = row[c];
+    }
+    models.add(maper(map));
+  }
+  return models;
 }

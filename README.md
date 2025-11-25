@@ -1,21 +1,6 @@
 Dart utils.
 
-## printX
-`printX([positioned arguments], {named arguments})`
-```dart
-void main() {
-  test("printX", () {
-    printX("abc");  // abc
-    printX(1, 2);   // 1 2
-    printX([1, 2, 3]);  // [1, 2, 3]
-    printX(1, "a", "b", sep: ", "); // 1, a, b
-    StringBuffer buf = StringBuffer();
-    printX(1, "a", "b", sep: ", ", buf: buf );
-    print(buf.toString()); // 1, a, b
-  });
-}
 
-```
 
 ## ini file 
 ```dart
