@@ -244,7 +244,7 @@ String _codesToString(List<int> charList) {
           if (i < charList.length && charList[i] == CharCode.PLUS) {
             i += 1;
           }
-          while (i < charList.length && charList.length < 4 && CharCode.isHex(charList[i])) {
+          while (i < charList.length && uls.length < 4 && CharCode.isHex(charList[i])) {
             uls.add(charList[i]);
             i += 1;
           }
