@@ -165,3 +165,7 @@
 
 ## 2.1.1
 * add XResult
+
+## 2.2.0
+* move MsgCenter, EventBus, MsgCall to package 'entao_message'
+* 

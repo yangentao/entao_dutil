@@ -1,6 +1,6 @@
 import 'package:entao_dutil/entao_dutil.dart';
 
-class XResult<T> {
+final class XResult<T> {
   final bool success;
   late final T value; // on success
   late final Object? extra; // on success
@@ -16,6 +16,8 @@ class XResult<T> {
 XResult<T> XSuccess<T>(T value, {Object? extra}) => XResult._success(value, extra: extra);
 
 XResult<T> XFailure<T>(XError failure) => XResult._failed(failure);
+
+XResult<T> XFailed<T>(String message, {int? code, dynamic error, Object? data}) => XResult._failed(XError(message: message, code: code, error: error, data: data));
 
 class XError {
   final String message;

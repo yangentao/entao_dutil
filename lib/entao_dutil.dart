@@ -3,7 +3,6 @@
 ///
 library;
 
-export 'src/MapModel.dart';
 export 'src/Pooled.dart';
 export 'src/basic.dart';
 export 'src/binders.dart';
@@ -18,8 +17,8 @@ export 'src/hex.dart';
 export 'src/ini_file.dart';
 export 'src/json_result.dart';
 export 'src/label_value.dart';
+export 'src/map_model.dart';
 export 'src/modbus.dart';
-export 'src/msg_center.dart';
 export 'src/notify_value.dart';
 export 'src/nums.dart';
 export 'src/pagination.dart';
