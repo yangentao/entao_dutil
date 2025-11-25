@@ -20,6 +20,8 @@ class TextScanner {
 
   int? get preChar => position >= 1 ? codeList[position - 1] : null;
 
+  int? get nextChar => position + 1 < codeList.length ? codeList[position + 1] : null;
+
   String get lastMatch => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
 
   ScanPos savePosition() {
