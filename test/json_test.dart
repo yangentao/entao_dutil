@@ -5,31 +5,36 @@ import 'package:println/println.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test("basic", () {
+  test("decode", () {
     // 1F600
-    print(yson.decode("true"));
-    print(yson.decode("false"));
-    print(yson.decode("null"));
-    print(yson.decode(""" "hello\\u1F600," """));
-    print(yson.decode("1.23"));
-    print(yson.decode("123"));
-    print(yson.decode("123e4"));
-    print(yson.decode("1.23e4"));
-    print(yson.decode("[1,2,3]"));
-    print(yson.decode("""["aa", "bb" , "cc" ]"""));
-    print(yson.decode(""" {"aa":1, "bb":null , "cc":"3c" } """));
-    print(yson.decode(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """));
+    expect(yson.decode("null"), null);
+    expect(yson.decode("true"), true);
+    expect(yson.decode("false"), false);
+    expect(yson.decode(""" "hello\\uD83C\\uDF0D," """), "hello🌍,");
+    expect(yson.decode("123"), 123);
+    expect(yson.decode("1.23"), 1.23);
+    expect(yson.decode("123e4"), 1230000);
+    expect(yson.decode("1.23e4"), 12300);
+    expect(yson.decode("[1,2,3]"), [1, 2, 3]);
+    expect(yson.decode("""["aa", "bb" , "cc" ]"""), ["aa", "bb", "cc"]);
+    expect(yson.decode(""" {"aa":1, "bb":null , "cc":"3c" } """), {"aa": 1, "bb": null, "cc": "3c"});
+    expect(yson.decode(""" {"aa":1, "bb":["aa", "bb" , "cc" ] , "cc":"3c" } """), {
+      "aa": 1,
+      "bb": ["aa", "bb", "cc"],
+      "cc": "3c"
+    });
   });
-  test("enc", () {
-    print(yson.encode(null));
-    print(yson.encode(true));
-    print(yson.encode(false));
-    print(yson.encode(123));
-    print(yson.encode(123.4));
-    print(yson.encode("abc"));
-    print(yson.encode([1, 2, 3]));
-    print(yson.encode(["a", "b", "c"]));
-    print(yson.encode({"a": 1, "b": 2, "c": 3}));
+
+  test("encode", () {
+    expect(yson.encode(null), "null");
+    expect(yson.encode(true), "true");
+    expect(yson.encode(false), "false");
+    expect(yson.encode(123), "123");
+    expect(yson.encode(123.4), "123.4");
+    expect(yson.encode("abc"), "\"abc\"");
+    expect(yson.encode([1, 2, 3]), "[1, 2, 3]");
+    expect(yson.encode(["a", "b", "c"]), """["a", "b", "c"]""");
+    expect(yson.encode({"a": 1, "b": 2, "c": 3}), """{"a":1, "b":2, "c":3}""");
   });
 
   test("loose list", () {
@@ -42,8 +47,7 @@ void main() {
   5,
   ]
   """;
-    var r = yson.decode(text, loose: true);
-    print(r);
+    expect(yson.decode(text, loose: true), [1, 2, 3, 4, 5]);
   });
   test("loose map", () {
     String text = """
@@ -54,8 +58,7 @@ void main() {
   
   }
   """;
-    var r = yson.decode(text, loose: true);
-    print(r);
+    expect(yson.decode(text, loose: true), {"a": 1, "b": 2, "c": 3});
   });
 
   test("unicode", () {
@@ -65,11 +68,11 @@ void main() {
     String text = """{"a":"\\u${Hex.encode(codes[0], bytes: 2)}\\u${Hex.encode(codes[1], bytes: 2)}"}""";
     print(text);
     var m = json.decode(text);
-    println(m["a"]);
+    expect(m["a"], "😀");
     var y = yson.decode(text);
-    println(y["a"]);
+    expect(y["a"], "😀");
 
-    String x = yson.encode(y, loose: true);
-    print(x);
+    print(yson.encode(y, loose: false));
+    print(yson.encode(y, loose: true));
   });
 }
