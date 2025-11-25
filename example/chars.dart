@@ -1,12 +1,14 @@
-
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:println/println.dart';
 
-void main(){
-  println(CharCode.equal(64, 97, icase: false ));
-  println(CharCode.equal(65, 97, icase: false ));
-  println(CharCode.equal(66, 97, icase: false ));
-  println(CharCode.equal(65, 96, icase: true));
-  println(CharCode.equal(65, 97, icase: true));
-  println(CharCode.equal(65, 98, icase: true));
+void main() {
+  String s = """
+   {
+   "name":"yang"
+   "age": 33
+   }
+   """;
+  String b = """[1111,2222,3333,4444,5555,]""";
+  dynamic v = yson.decode(b, loose: true);
+  String j = yson.encode(v, loose: true, prety: true);
+  print(j);
 }

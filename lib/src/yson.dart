@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:entao_dutil/src/basic.dart';
 import 'package:entao_dutil/src/char_code.dart';
 import 'package:entao_dutil/src/collection.dart';
@@ -9,7 +10,7 @@ import 'text_scanner.dart';
 class yson {
   yson._();
 
-  static String encode(dynamic value, {bool loose = false}) {
+  static String encode(dynamic value, {bool loose = false, bool prety = false}) {
     switch (value) {
       case null:
         return "null";
@@ -20,10 +21,26 @@ class yson {
       case bool b:
         return b.toString();
       case List ls:
-        return "[${ls.map((e) => encode(e, loose: loose)).join(", ")}]";
+        Iterable<String> sList = ls.map((e) => encode(e, loose: loose));
+        String sep = ", ";
+        String a = "";
+        if (prety) {
+          int sumLen = sList.sumValueBy((String e) => e.length) ?? 0;
+          if (sumLen > 50) {
+            sep = loose ? "\n" : ",\n";
+            a = "\n";
+          }
+        }
+        return "[$a${sList.join(sep)}$a]";
       case Map map:
-        if (loose) return "{${map.entries.map((e) => "${e.key}:${encode(e.value, loose: loose)}").join(", ")}}";
-        return "{${map.entries.map((e) => "${encode(e.key)}:${encode(e.value, loose: loose)}").join(", ")}}";
+        String a = prety ? "\n" : "";
+        if (loose) {
+          String sep = prety ? "\n" : ", ";
+          return "{$a${map.entries.map((e) => "${e.key}:${encode(e.value, loose: loose)}").join(sep)}$a}";
+        } else {
+          String sep = prety ? ",\n" : ", ";
+          return "{$a${map.entries.map((e) => "${encode(e.key)}:${encode(e.value, loose: loose)}").join(sep)}$a}";
+        }
       default:
         raise("Unknown type: $value");
     }

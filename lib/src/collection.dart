@@ -93,6 +93,47 @@ extension IterableExt<E> on Iterable<E> {
   }
 }
 
+extension ListComparableExt<T extends Comparable<T>> on Iterable<T> {
+  R? maxValueBy<R extends Comparable>(R Function(T) prop) {
+    R? m;
+    for (var a in this) {
+      R v = prop(a);
+      if (m == null || m.compareTo(v) < 0) {
+        m = v;
+      }
+    }
+    return m;
+  }
+
+  R? minValueBy<R extends Comparable>(R Function(T) prop) {
+    R? m;
+    for (var a in this) {
+      R v = prop(a);
+      if (m == null || m.compareTo(v) > 0) {
+        m = v;
+      }
+    }
+    return m;
+  }
+
+  R? sumValueBy<R extends num>(R Function(T) prop) {
+    R? m;
+    for (var a in this) {
+      R v = prop(a);
+      if (m == null) {
+        m = v;
+      } else {
+        m = (m + v) as R;
+      }
+    }
+    return m;
+  }
+
+  double? avgValueBy<R extends num>(R Function(T) prop) {
+    return sumValueBy(prop)?.let((e) => e / length);
+  }
+}
+
 extension ListNumExt<T extends num> on Iterable<T> {
   double? avgValue() {
     return sumValues()?.let((e) => e / length);
