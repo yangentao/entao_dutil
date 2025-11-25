@@ -29,7 +29,7 @@ void main() {
     ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
     ts.skip();
     ts.printLastBuf();
-    ts.skipChars(CharCode.SpTabCrLf + [CharCode.COMMA, CharCode.SEMI]);
+    ts.skipChars(CharCode.SP_TAB_CR_LF + [CharCode.COMMA, CharCode.SEMI]);
     ts.skipSpaceTabCrLf();
 
     ts.tryExpectString("male");
