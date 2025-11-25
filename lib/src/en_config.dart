@@ -5,6 +5,7 @@ import 'char_code.dart';
 import 'collection.dart';
 import 'strings.dart';
 
+@Deprecated("message")
 class EnConfig {
   EnConfig._();
 
