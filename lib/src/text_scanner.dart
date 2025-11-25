@@ -4,17 +4,6 @@ import 'package:entao_dutil/src/strings.dart';
 
 typedef CharPredicator = bool Function(int);
 
-class ScanPos {
-  final TextScanner _scanner;
-  final int _pos;
-
-  ScanPos(this._scanner, this._pos);
-
-  void restore() {
-    _scanner.position = _pos;
-  }
-}
-
 class TextScanner {
   final String text;
   final List<int> codeList;
@@ -175,5 +164,16 @@ class TextScanner {
   String get leftText {
     if (position >= 0 && position < text.length) return text.substring(position).head(64);
     return text.tail(64);
+  }
+}
+
+class ScanPos {
+  final TextScanner _scanner;
+  final int _pos;
+
+  ScanPos(this._scanner, this._pos);
+
+  void restore() {
+    _scanner.position = _pos;
   }
 }

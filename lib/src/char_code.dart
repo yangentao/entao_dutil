@@ -19,6 +19,23 @@ class CharCode {
 
   static bool isPrintable(int code) => code >= 32;
 
+  static bool equal(int left, int right, {bool icase = false}) {
+    return icase ? icaseEqual(left, right) : left == right;
+  }
+
+  static bool icaseEqual(int left, int right) {
+    if (left >= a) {
+      if (right <= Z) {
+        return left - 32 == right;
+      }
+    } else if (left <= Z) {
+      if (right >= a) {
+        return left + 32 == right;
+      }
+    }
+    return left == right;
+  }
+
   static const List<int> SP_TAB = [SP, HTAB];
   static const List<int> SP_TAB_CR_LF = [SP, HTAB, CR, LF];
 
