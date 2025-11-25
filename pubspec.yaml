@@ -5,7 +5,8 @@ repository: https://github.com/yangentao/entao_dutil
 homepage: https://github.com/yangentao/entao_dutil
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.6.0
+resolution: workspace
 
 dependencies:
   intl: ^0.20.2

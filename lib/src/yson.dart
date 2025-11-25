@@ -189,7 +189,7 @@ class _YsonParser {
   }
 
   Never _raise([String msg = "Parse Error"]) {
-    throw Exception("$msg. ${_ts.position}, ${_ts.leftText}");
+    throw Exception("$msg. ${_ts.position}, ${_ts.rest}");
   }
 }
 

@@ -163,7 +163,7 @@ class TextScanner {
   }
 
   Never raise([String msg = "scan error"]) {
-    throw Exception("$msg. $position, $leftText");
+    throw Exception("$msg. $position, $rest");
   }
 
   String get rest {
