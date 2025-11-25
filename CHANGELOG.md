@@ -168,4 +168,5 @@
 
 ## 2.2.0
 * move MsgCenter, EventBus, MsgCall to package 'entao_message'
-* 
+* move 'IniFile' to package 'entao_ini'
+* move 'Modbus' to package 'entao_modbus'
