@@ -40,7 +40,6 @@ class TextScanner {
     return skipChars(CharCode.SP_TAB_CR_LF);
   }
 
-
   List<int> skipSpTab() {
     return skipChars(CharCode.SP_TAB);
   }
@@ -210,7 +209,7 @@ void _testUnescapeCharCodes() {
   // llo🌍OK
 }
 
-String unescapeCharCodes(List<int> charList, {int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U], required Map<int, int> map}) {
+String unescapeCharCodes(List<int> charList, {required Map<int, int> map, int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U]}) {
   List<int> buf = [];
   bool escaping = false;
   int i = 0;
@@ -249,4 +248,65 @@ String unescapeCharCodes(List<int> charList, {int escapeChar = CharCode.BSLASH, 
     i += 1;
   }
   return String.fromCharCodes(buf);
+}
+
+String unescapeText(String text, {required Map<int, int> map, int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U]}) {
+  return unescapeCharCodes(text.codeUnits, map: map, unicodeChars: unicodeChars, escapeChar: escapeChar);
+}
+
+String escapeText(String text, {required Map<int, int> map, int escapeCode = CharCode.BSLASH, int unicodeChar = CharCode.u, bool escapeUnicode = false}) {
+  return escapeCharCodes(text.codeUnits, map: map, escapeCode: escapeCode, unicodeChar: unicodeChar, escapeUnicode: escapeUnicode);
+}
+
+String escapeCharCodes(List<int> textCodes, {required Map<int, int> map, int escapeCode = CharCode.BSLASH, int unicodeChar = CharCode.u, bool escapeUnicode = false}) {
+  if (textCodes.isEmpty) return "";
+  Set<int> keyCodes = map.keys.toSet();
+  List<int> buf = [];
+  for (int i = 0; i < textCodes.length; ++i) {
+    int ch = textCodes[i];
+    if (keyCodes.contains(ch)) {
+      buf.add(escapeCode);
+      buf.add(map[ch]!);
+    } else if (ch < 32) {
+      buf._appendUnicodeEscaped(ch, unicodeChar: unicodeChar);
+    } else if (escapeUnicode && ch > _utf16Lead && (i + 1 < textCodes.length) && _isUtf16(ch, textCodes[i + 1])) {
+      buf._appendUnicodeEscaped(ch, unicodeChar: unicodeChar);
+      buf._appendUnicodeEscaped(textCodes[i + 1], unicodeChar: unicodeChar);
+      i += 1;
+    } else {
+      buf.add(ch);
+    }
+  }
+  return String.fromCharCodes(buf);
+}
+
+// '0' + x  or  'a' + x - 10
+int _hex4(int x) => x < 10 ? 48 + x : 87 + x;
+
+int _lastHex(int x) => _hex4(x & 0x0F);
+
+const int _utf16Lead = 0xD800; // 110110 00
+const int _utf16Trail = 0xDC00; // 110111 00
+const int _utf16Mask = 0xFC00; // 111111 00
+
+bool _isUtf16(int a, int b) {
+  return (a & _utf16Mask == _utf16Lead) && (b & _utf16Mask == _utf16Trail);
+}
+
+extension ListIntUnicodeEncodeExt on List<int> {
+  void _appendUnicodeEscaped(int ch, {int unicodeChar = CharCode.u}) {
+    this.add(CharCode.BSLASH);
+    this.add(unicodeChar);
+    if (ch > _utf16Lead) {
+      this.add(CharCode.d);
+      this.add(_lastHex(ch >> 8));
+      this.add(_lastHex(ch >> 4));
+      this.add(_lastHex(ch));
+    } else {
+      this.add(_lastHex(ch >> 12));
+      this.add(_lastHex(ch >> 8));
+      this.add(_lastHex(ch >> 4));
+      this.add(_lastHex(ch));
+    }
+  }
 }

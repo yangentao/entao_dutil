@@ -173,3 +173,6 @@
 
 ## 2.2.1
 * TextScanner, String.quoted/unquoted
+
+## 2.2.2
+* escape/unescape text
