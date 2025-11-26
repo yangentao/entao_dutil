@@ -128,55 +128,40 @@ class TextScanner {
     return ls;
   }
 
-  /// if size,acceptor,terminator all is null, moveNext(size = 1)
   List<int> moveNext({int? size, CharPredicator? acceptor, CharPredicator? terminator, bool buffered = true}) {
+    assert(size == null || size > 0);
+    if (size == null && acceptor == null && terminator == null) {
+      size = 1;
+    }
     List<int> buf = [];
     if (buffered) {
       matched = buf;
     }
-
-    if (acceptor != null) {
-      while (!isEnd) {
-        int? ch = nowChar;
-        if (ch == null) break;
-        if (acceptor(ch)) {
-          if (size != null) {
-            if (size > buf.length) {
-              buf.add(ch);
-              position += 1;
-            }
-            if (size == buf.length) return buf;
-          } else {
-            buf.add(ch);
-            position += 1;
-          }
-        } else {
-          if (size != null && size != buf.length) {
-            raise();
-          }
-          return buf;
+    while (true) {
+      int? ch = nowChar;
+      if (ch == null) break;
+      if (size != null) {
+        if (buf.length == size) {
+          break;
         }
       }
-      if (isEnd) return buf;
-    } else if (terminator != null) {
-      while (!isEnd) {
-        int? ch = nowChar;
-        if (ch == null) break;
-        if (terminator(ch)) {
-          return buf;
-        } else {
-          buf.add(ch);
-          position += 1;
+      if (terminator != null) {
+        if (terminator.call(ch)) {
+          break;
         }
       }
-      if (isEnd) return buf;
-    } else {
-      size ??= 1;
-      if (position + size > codeList.length) {
-        raise("Exceed max length: $size");
+      if (acceptor != null) {
+        if (!acceptor.call(ch)) {
+          break;
+        }
       }
-      buf.addAll(codeList.sublist(position, position + size));
-      position += size;
+      buf.add(ch);
+      position += 1;
+    }
+    if (size != null) {
+      if (buf.length != size) {
+        raise();
+      }
     }
     return buf;
   }
