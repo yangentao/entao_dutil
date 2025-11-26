@@ -38,6 +38,7 @@ class CharCode {
 
   static const List<int> SP_TAB = [SP, HTAB];
   static const List<int> SP_TAB_CR_LF = [SP, HTAB, CR, LF];
+  static const List<int> CR_LF = [CR, LF];
 
   /// Null character
   static const int NUL = 0;

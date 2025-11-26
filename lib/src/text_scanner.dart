@@ -36,12 +36,17 @@ class TextScanner {
     if (position > 0) position -= 1;
   }
 
-  List<int> skipSpaceTabCrLf() {
-    return skipChars([CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF]);
+  List<int> skipWhites() {
+    return skipChars(CharCode.SP_TAB_CR_LF);
   }
 
-  List<int> skipSpaceTab() {
-    return skipChars([CharCode.SP, CharCode.HTAB]);
+
+  List<int> skipSpTab() {
+    return skipChars(CharCode.SP_TAB);
+  }
+
+  List<int> skipCrLf() {
+    return skipChars(CharCode.CR_LF);
   }
 
   List<int> skipChars(Iterable<int> ls) {
@@ -52,9 +57,15 @@ class TextScanner {
     return moveNext(size: size, acceptor: acceptor, terminator: terminator, buffered: false);
   }
 
-  List<int> moveUntil(List<int> chars) {
+  List<int> moveUntilChar(int ch, {int? escapeChar}) {
+    if (escapeChar == null) return moveNext(terminator: (e) => ch == e);
+    return moveNext(terminator: (e) => ch == e && preChar != escapeChar);
+  }
+
+  List<int> moveUntil(List<int> chars, {int? escapeChar}) {
     assert(chars.isNotEmpty);
-    return moveNext(terminator: (e) => chars.contains(e));
+    if (escapeChar == null) return moveNext(terminator: (e) => chars.contains(e));
+    return moveNext(terminator: (e) => chars.contains(e) && preChar != escapeChar);
   }
 
   void expectChar(int ch) {
@@ -127,7 +138,7 @@ class TextScanner {
           buf.add(ch);
           position += 1;
         } else {
-          if(size != null && size != buf.length){
+          if (size != null && size != buf.length) {
             raise();
           }
           return buf;
@@ -181,4 +192,61 @@ class ScanPos {
   void restore() {
     _scanner.position = _pos;
   }
+}
+
+void _testUnescapeCharCodes() {
+  String s = unescapeCharCodes("He\\nllo\\uD83C\\uDF0DOK".codeUnits, map: {
+    CharCode.SQUOTE: CharCode.SQUOTE,
+    CharCode.BSLASH: CharCode.BSLASH,
+    CharCode.SLASH: CharCode.SLASH,
+    CharCode.b: CharCode.BS,
+    CharCode.f: CharCode.FF,
+    CharCode.n: CharCode.LF,
+    CharCode.r: CharCode.CR,
+    CharCode.t: CharCode.HTAB,
+  });
+  print(s);
+  // He
+  // llo🌍OK
+}
+
+String unescapeCharCodes(List<int> charList, {int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U], required Map<int, int> map}) {
+  List<int> buf = [];
+  bool escaping = false;
+  int i = 0;
+  while (i < charList.length) {
+    int ch = charList[i];
+    if (!escaping) {
+      if (ch == escapeChar) {
+        escaping = true;
+      } else {
+        buf.add(ch);
+      }
+    } else {
+      escaping = false;
+      int? repChar = map[ch];
+      if (repChar != null) {
+        buf.add(repChar);
+      } else if (unicodeChars.contains(ch)) {
+        List<int> uls = [];
+        i += 1;
+        if (i < charList.length && charList[i] == CharCode.PLUS) {
+          i += 1;
+        }
+        while (i < charList.length && uls.length < 4 && CharCode.isHex(charList[i])) {
+          uls.add(charList[i]);
+          i += 1;
+        }
+        if (uls.length != 4) throw Exception("Convert to string failed: ${String.fromCharCodes(charList)}.");
+        String s = String.fromCharCodes(uls);
+        int n = int.parse(s, radix: 16);
+        buf.addAll(String.fromCharCode(n).codeUnits);
+        i -= 1;
+      } else {
+        buf.add(ch);
+      }
+    }
+    i += 1;
+  }
+  return String.fromCharCodes(buf);
 }

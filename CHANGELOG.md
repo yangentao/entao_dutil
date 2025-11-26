@@ -170,3 +170,6 @@
 * move MsgCenter, EventBus, MsgCall to package 'entao_message'
 * move 'IniFile' to package 'entao_ini'
 * move 'Modbus' to package 'entao_modbus'
+
+## 2.2.1
+* TextScanner, String.quoted/unquoted

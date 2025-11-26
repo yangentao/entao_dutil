@@ -1,5 +1,4 @@
 import 'package:entao_dutil/entao_dutil.dart';
-import 'package:entao_dutil/src/string_escape.dart';
 
 void main() {
   String s = unescapeCharCodes("He\\nllo\\uD83C\\uDF0DOK".codeUnits, map: {

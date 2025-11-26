@@ -115,8 +115,8 @@ class _YsonParser {
   }
 
   dynamic _parseValue() {
-    if (_ts.isEnd) return null;
     _ts.skipWhites();
+    if (_ts.isEnd) return null;
     int ch = _ts.nowChar;
     switch (ch) {
       case CharCode.LCUB:

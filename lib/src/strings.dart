@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:entao_dutil/src/collection_list.dart';
+import 'package:entao_dutil/entao_dutil.dart';
 import 'package:uuid/uuid.dart';
-
-import 'collection.dart';
 
 const Uuid _uuid = Uuid();
 
@@ -170,9 +168,26 @@ extension StringExtension on String {
     return IgnoreCase.compare(this, other);
   }
 
-  String get quoted => "\"$this\"";
+  String get singleQuoted {
+    if (length >= 2 && codeUnitAt(0) == CharCode.SQUOTE && codeUnitAt(length - 1) == CharCode.SQUOTE) {
+      return this;
+    }
+    return "'$this'";
+  }
 
-  String get singleQuoted => "'$this'";
+  String get quoted {
+    if (length >= 2 && codeUnitAt(0) == CharCode.QUOTE && codeUnitAt(length - 1) == CharCode.QUOTE) {
+      return this;
+    }
+    return "\"$this\"";
+  }
+
+  String get unquoted {
+    if (length >= 2 && codeUnitAt(0) == CharCode.QUOTE && codeUnitAt(length - 1) == CharCode.QUOTE) {
+      return substring(1, length - 1);
+    }
+    return this;
+  }
 
   //trim and not empty.
   List<String> splitX(Pattern p) {

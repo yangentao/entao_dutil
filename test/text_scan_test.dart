@@ -13,24 +13,24 @@ void main() {
   """;
   test("basic", () {
     TextScanner ts = TextScanner(text);
-    ts.skipSpaceTabCrLf();
+    ts.skipWhites();
     ts.tryExpectChar(CharCode.LCUB); // {
     ts.printLastBuf();
-    ts.skipSpaceTabCrLf();
+    ts.skipWhites();
 
     ts.expectIdent(); // name
     ts.printLastBuf();
 
-    ts.skipSpaceTab();
+    ts.skipSpTab();
     ts.tryExpectChar(CharCode.COLON); // :
-    ts.skipSpaceTab();
+    ts.skipSpTab();
     ts.tryExpectChar(CharCode.QUOTE); // "
     // ts.skip();
     ts.moveNext(terminator: (e) => e == CharCode.QUOTE);
     ts.skip();
     ts.printLastBuf();
     ts.skipChars(CharCode.SP_TAB_CR_LF + [CharCode.COMMA, CharCode.SEMI]);
-    ts.skipSpaceTabCrLf();
+    ts.skipWhites();
 
     ts.tryExpectString("male");
     ts.printLastBuf();
