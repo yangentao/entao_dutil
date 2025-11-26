@@ -199,7 +199,7 @@ class _YsonParser {
 
   String _parseString() {
     _ts.expectChar(CharCode.QUOTE);
-    List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE && _ts.lastBuf.lastOrNull != CharCode.BSLASH);
+    List<int> charList = _ts.moveNext(terminator: (e) => e == CharCode.QUOTE && _ts.matched.lastOrNull != CharCode.BSLASH);
     String s = _codesToString(charList);
     _ts.expectChar(CharCode.QUOTE);
     return s;

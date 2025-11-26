@@ -7,8 +7,8 @@ typedef CharPredicator = bool Function(int);
 class TextScanner {
   final String text;
   final List<int> codeList;
-  List<int> lastBuf = [];
   int position = 0;
+  List<int> matched = [];
 
   TextScanner(this.text) : codeList = text.codeUnits;
 
@@ -22,14 +22,14 @@ class TextScanner {
 
   int? get nextChar => position + 1 < codeList.length ? codeList[position + 1] : null;
 
-  String get lastMatch => lastBuf.isEmpty ? "" : String.fromCharCodes(lastBuf);
+  String get matchedText => matched.isEmpty ? "" : String.fromCharCodes(matched);
 
   ScanPos savePosition() {
     return ScanPos(this, position);
   }
 
   void printLastBuf() {
-    print(lastMatch);
+    print(matchedText);
   }
 
   void back([int size = 1]) {
@@ -58,14 +58,14 @@ class TextScanner {
   }
 
   void expectChar(int ch) {
-    List<int> ls = moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
+    List<int> ls = moveNext(acceptor: (e) => ch == e && matched.isEmpty);
     bool ok = ls.length == 1 && ls.first == ch;
     if (!ok) raise();
   }
 
   /// 最多吃掉一个
   bool tryExpectChar(int ch) {
-    List<int> ls = moveNext(acceptor: (e) => ch == e && lastBuf.isEmpty);
+    List<int> ls = moveNext(acceptor: (e) => ch == e && matched.isEmpty);
     return ls.length == 1 && ls.first == ch;
   }
 
@@ -81,7 +81,7 @@ class TextScanner {
   void expectString(String s, {bool icase = false}) {
     assert(s.isNotEmpty);
     List<int> cs = s.codeUnits;
-    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && CharCode.equal(e, cs[lastBuf.length], icase: icase));
+    List<int> ls = moveNext(acceptor: (e) => matched.length < cs.length && CharCode.equal(e, cs[matched.length], icase: icase));
     bool ok = ls.length == cs.length;
     if (!ok) raise("expect $s.");
   }
@@ -91,7 +91,7 @@ class TextScanner {
     assert(s.isNotEmpty);
     ScanPos tp = savePosition();
     List<int> cs = s.codeUnits;
-    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && CharCode.equal(e, cs[lastBuf.length], icase: icase));
+    List<int> ls = moveNext(acceptor: (e) => matched.length < cs.length && CharCode.equal(e, cs[matched.length], icase: icase));
     bool ok = ls.length == cs.length;
     if (!ok) tp.restore();
     return ok;
@@ -109,7 +109,7 @@ class TextScanner {
   }
 
   List<int> expectIdent() {
-    List<int> ls = moveNext(acceptor: (e) => lastBuf.isEmpty ? (CharCode.isAlpha(e) || e == CharCode.LOWBAR) : CharCode.isIdent(e));
+    List<int> ls = moveNext(acceptor: (e) => matched.isEmpty ? (CharCode.isAlpha(e) || e == CharCode.LOWBAR) : CharCode.isIdent(e));
     if (ls.isEmpty) raise();
     return ls;
   }
@@ -118,7 +118,7 @@ class TextScanner {
   List<int> moveNext({int? size, CharPredicator? acceptor, CharPredicator? terminator, bool buffered = true}) {
     List<int> buf = [];
     if (buffered) {
-      lastBuf = buf;
+      matched = buf;
     }
     if (acceptor != null) {
       while (!isEnd) {
@@ -127,6 +127,9 @@ class TextScanner {
           buf.add(ch);
           position += 1;
         } else {
+          if(size != null && size != buf.length){
+            raise();
+          }
           return buf;
         }
       }
