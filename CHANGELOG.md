@@ -176,3 +176,6 @@
 
 ## 2.2.2
 * escape/unescape text
+
+## 2.2.3
+* TextScanner.moveNext
