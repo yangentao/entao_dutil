@@ -78,20 +78,20 @@ class TextScanner {
   }
 
   /// 匹配失败, 跑出异常
-  void expectString(String s) {
+  void expectString(String s, {bool icase = false}) {
     assert(s.isNotEmpty);
     List<int> cs = s.codeUnits;
-    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
+    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && CharCode.equal(e, cs[lastBuf.length], icase: icase));
     bool ok = ls.length == cs.length;
     if (!ok) raise("expect $s.");
   }
 
   /// 匹配失败, 会回退位置
-  bool tryExpectString(String s) {
+  bool tryExpectString(String s, {bool icase = false}) {
     assert(s.isNotEmpty);
     ScanPos tp = savePosition();
     List<int> cs = s.codeUnits;
-    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && e == cs[lastBuf.length]);
+    List<int> ls = moveNext(acceptor: (e) => lastBuf.length < cs.length && CharCode.equal(e, cs[lastBuf.length], icase: icase));
     bool ok = ls.length == cs.length;
     if (!ok) tp.restore();
     return ok;
