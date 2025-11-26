@@ -65,7 +65,7 @@ class _LooseYsonParser extends _YsonParser {
     Map<String, dynamic> map = {};
     _ts.expectChar(CharCode.LCUB);
     _ts.skipWhites();
-    while (_ts.nowChar != CharCode.RCUB) {
+    while (_ts.nowChar != null && _ts.nowChar != CharCode.RCUB) {
       _ts.skipWhites();
       String key = _ts.nowChar == CharCode.QUOTE ? _parseString() : _parseIdent();
       _ts.skipWhites();
@@ -74,7 +74,7 @@ class _LooseYsonParser extends _YsonParser {
       dynamic v = _parseValue();
       map[key] = v;
       List<int> trails = _ts.skipChars(_TRAIL);
-      if (_ts.nowChar != CharCode.RCUB) {
+      if (_ts.nowChar != null && _ts.nowChar != CharCode.RCUB) {
         if (trails.intersect(_SEP).isEmpty) _raise();
       }
     }
@@ -117,8 +117,10 @@ class _YsonParser {
   dynamic _parseValue() {
     _ts.skipWhites();
     if (_ts.isEnd) return null;
-    int ch = _ts.nowChar;
+    int? ch = _ts.nowChar;
     switch (ch) {
+      case null:
+        return null;
       case CharCode.LCUB:
         return parseObject();
       case CharCode.LSQB:
@@ -148,7 +150,7 @@ class _YsonParser {
     Map<String, dynamic> map = {};
     _ts.expectChar(CharCode.LCUB);
     _ts.skipWhites();
-    while (_ts.nowChar != CharCode.RCUB) {
+    while (_ts.nowChar != null && _ts.nowChar != CharCode.RCUB) {
       _ts.skipWhites();
       String key = _parseString();
       _ts.skipWhites();
@@ -156,7 +158,7 @@ class _YsonParser {
       dynamic v = _parseValue();
       map[key] = v;
       _ts.skipWhites();
-      if (_ts.nowChar != CharCode.RCUB) {
+      if (_ts.nowChar != null && _ts.nowChar != CharCode.RCUB) {
         _ts.expectChar(CharCode.COMMA);
         _ts.skipWhites();
       }

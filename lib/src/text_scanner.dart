@@ -16,7 +16,7 @@ class TextScanner {
 
   bool get isStart => position == 0;
 
-  int get nowChar => codeList[position];
+  int? get nowChar => position >= 0 && position < codeList.length ? codeList[position] : null;
 
   int? get preChar => position >= 1 ? codeList[position - 1] : null;
 
@@ -26,6 +26,10 @@ class TextScanner {
 
   ScanPos savePosition() {
     return ScanPos(this, position);
+  }
+
+  void restore(ScanPos pos) {
+    this.position = pos.pos;
   }
 
   void printLastBuf() {
@@ -130,12 +134,22 @@ class TextScanner {
     if (buffered) {
       matched = buf;
     }
+
     if (acceptor != null) {
       while (!isEnd) {
-        int ch = nowChar;
+        int? ch = nowChar;
+        if (ch == null) break;
         if (acceptor(ch)) {
-          buf.add(ch);
-          position += 1;
+          if (size != null) {
+            if (size > buf.length) {
+              buf.add(ch);
+              position += 1;
+            }
+            if (size == buf.length) return buf;
+          } else {
+            buf.add(ch);
+            position += 1;
+          }
         } else {
           if (size != null && size != buf.length) {
             raise();
@@ -146,7 +160,8 @@ class TextScanner {
       if (isEnd) return buf;
     } else if (terminator != null) {
       while (!isEnd) {
-        int ch = nowChar;
+        int? ch = nowChar;
+        if (ch == null) break;
         if (terminator(ch)) {
           return buf;
         } else {
@@ -184,12 +199,12 @@ class TextScanner {
 
 class ScanPos {
   final TextScanner _scanner;
-  final int _pos;
+  final int pos;
 
-  ScanPos(this._scanner, this._pos);
+  ScanPos(this._scanner, this.pos);
 
   void restore() {
-    _scanner.position = _pos;
+    _scanner.restore(this);
   }
 }
 
