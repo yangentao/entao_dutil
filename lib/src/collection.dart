@@ -3,12 +3,7 @@ import 'dart:collection';
 import 'basic.dart';
 
 extension IterableExt<E> on Iterable<E> {
-  bool all(bool Function(E element) test) {
-    for (E element in this) {
-      if (!test(element)) return false;
-    }
-    return true;
-  }
+  bool all(bool Function(E element) test) => every(test);
 
   Set<E> intersect(Iterable<E> other) {
     Set<E> set = {};
@@ -93,7 +88,7 @@ extension IterableExt<E> on Iterable<E> {
   }
 }
 
-extension ListComparableExt<T extends Comparable<T>> on Iterable<T> {
+extension ListComparableExt<T> on Iterable<T> {
   R? maxValueBy<R extends Comparable>(R Function(T) prop) {
     R? m;
     for (var a in this) {
@@ -178,16 +173,12 @@ extension NullableIterableExtensions22<T extends Object> on Iterable<T?> {
 
 extension MapGetOrPut<K, V> on Map<K, V> {
   V getOrPut(K key, V Function() onMiss) {
-    V? v = this[key];
-    if (v != null) {
-      return v;
+    if (this.containsKey(key)) {
+      return this[key] as V;
     }
-    if (!this.containsKey(key)) {
-      V vv = onMiss();
-      this[key] = vv;
-      return vv;
-    }
-    return null as V;
+    V vv = onMiss();
+    this[key] = vv;
+    return vv;
   }
 }
 

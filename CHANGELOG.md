@@ -179,3 +179,6 @@
 
 ## 2.2.3
 * TextScanner.moveNext
+
+## 2.2.4
+* iterable.minValueBy/maxValueBy

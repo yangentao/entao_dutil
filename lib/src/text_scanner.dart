@@ -12,10 +12,18 @@ class TextScanner {
 
   TextScanner(this.text) : codeList = text.codeUnits;
 
-  bool get isEnd => position >= codeList.length;
-
   bool get isStart => position == 0;
 
+  bool get isEnd => position >= codeList.length;
+
+  bool get notEnd => position >= 0 && position < codeList.length;
+
+  int get sizeLeft => (codeList.length - position).clamp(0, codeList.length);
+
+  /// 不检查边界
+  int get currentChar => codeList[position];
+
+  /// 检查边界
   int? get nowChar => position >= 0 && position < codeList.length ? codeList[position] : null;
 
   int? get preChar => position >= 1 ? codeList[position - 1] : null;
@@ -37,7 +45,13 @@ class TextScanner {
   }
 
   void back([int size = 1]) {
-    if (position > 0) position -= 1;
+    position -= size;
+    if (position < 0) raise();
+  }
+
+  void forward([int size = 1]) {
+    position += size;
+    if (position >= codeList.length) raise();
   }
 
   List<int> skipWhites() {
@@ -209,6 +223,14 @@ void _testUnescapeCharCodes() {
   // llo🌍OK
 }
 
+String escapeText(String text, {required Map<int, int> map, int escapeCode = CharCode.BSLASH, int unicodeChar = CharCode.u, bool escapeUnicode = false}) {
+  return escapeCharCodes(text.codeUnits, map: map, escapeCode: escapeCode, unicodeChar: unicodeChar, escapeUnicode: escapeUnicode);
+}
+
+String unescapeText(String text, {required Map<int, int> map, int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U]}) {
+  return unescapeCharCodes(text.codeUnits, map: map, unicodeChars: unicodeChars, escapeChar: escapeChar);
+}
+
 String unescapeCharCodes(List<int> charList, {required Map<int, int> map, int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U]}) {
   List<int> buf = [];
   bool escaping = false;
@@ -248,14 +270,6 @@ String unescapeCharCodes(List<int> charList, {required Map<int, int> map, int es
     i += 1;
   }
   return String.fromCharCodes(buf);
-}
-
-String unescapeText(String text, {required Map<int, int> map, int escapeChar = CharCode.BSLASH, List<int> unicodeChars = const [CharCode.u, CharCode.U]}) {
-  return unescapeCharCodes(text.codeUnits, map: map, unicodeChars: unicodeChars, escapeChar: escapeChar);
-}
-
-String escapeText(String text, {required Map<int, int> map, int escapeCode = CharCode.BSLASH, int unicodeChar = CharCode.u, bool escapeUnicode = false}) {
-  return escapeCharCodes(text.codeUnits, map: map, escapeCode: escapeCode, unicodeChar: unicodeChar, escapeUnicode: escapeUnicode);
 }
 
 String escapeCharCodes(List<int> textCodes, {required Map<int, int> map, int escapeCode = CharCode.BSLASH, int unicodeChar = CharCode.u, bool escapeUnicode = false}) {
