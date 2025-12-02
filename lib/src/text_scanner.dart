@@ -126,6 +126,17 @@ class TextScanner {
     return ls;
   }
 
+  int expectAnyString(List<String> ls, {bool icase = false}) {
+    assert(ls.isNotEmpty && ls.minValueBy((e) => e.length)! > 0);
+    int i = peekAny(ls, icase: icase);
+    if (i >= 0) {
+      skip(size: ls[i].length);
+    }else {
+      raise();
+    }
+    return i;
+  }
+
   /// 匹配失败, 跑出异常
   void expectString(String s, {bool icase = false}) {
     assert(s.isNotEmpty);
