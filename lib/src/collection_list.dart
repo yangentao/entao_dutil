@@ -152,7 +152,11 @@ class LimitList<T> extends Iterable<T> {
   }
 
   void operator []=(int index, T value) {
-    _list[index] = value;
+    if (index == _list.length) {
+      _list.add(value);
+    } else {
+      _list[index] = value;
+    }
     _checkLength();
   }
 
