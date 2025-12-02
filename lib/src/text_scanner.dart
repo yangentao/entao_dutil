@@ -1,6 +1,4 @@
-import 'package:entao_dutil/src/char_code.dart';
-import 'package:entao_dutil/src/collection_sort.dart';
-import 'package:entao_dutil/src/strings.dart';
+import 'package:entao_dutil/entao_dutil.dart';
 
 typedef CharPredicator = bool Function(int);
 
@@ -85,6 +83,29 @@ class TextScanner {
     return moveNext(terminator: (e) => chars.contains(e) && preChar != escapeChar);
   }
 
+  List<int> moveUntilString(String s, {int? escapeChar, bool icase = false}) {
+    assert(s.isNotEmpty);
+    if (escapeChar == null) return moveNext(terminator: (e) => peek(s, icase: icase));
+    return moveNext(terminator: (e) => peek(s, icase: icase) && preChar != escapeChar);
+  }
+
+  int moveUntilAnyString(List<String> ls, {int? escapeChar, bool icase = false}) {
+    assert(ls.isNotEmpty && ls.minValueBy((e) => e.length)! > 0);
+    int index = -1;
+    if (escapeChar == null) {
+      moveNext(terminator: (e) {
+        index = peekAny(ls, icase: icase);
+        return index >= 0;
+      });
+    } else {
+      moveNext(terminator: (e) {
+        index = peekAny(ls, icase: icase);
+        return index >= 0 && preChar != escapeChar;
+      });
+    }
+    return index;
+  }
+
   void expectChar(int ch) {
     List<int> ls = moveNext(acceptor: (e) => ch == e && matched.isEmpty);
     bool ok = ls.length == 1 && ls.first == ch;
@@ -112,6 +133,23 @@ class TextScanner {
     List<int> ls = moveNext(acceptor: (e) => matched.length < cs.length && CharCode.equal(e, cs[matched.length], icase: icase));
     bool ok = ls.length == cs.length;
     if (!ok) raise("expect $s.");
+  }
+
+  bool peek(String s, {bool icase = false}) {
+    assert(s.isNotEmpty);
+    if (position + s.length > codeList.length) return false;
+    for (int i = 0; i < s.length; ++i) {
+      if (!CharCode.equal(codeList[position + i], s.codeUnitAt(i), icase: icase)) return false;
+    }
+    return true;
+  }
+
+  int peekAny(List<String> ls, {bool icase = false}) {
+    assert(ls.isNotEmpty && ls.minValueBy((e) => e.length)! > 0);
+    for (int i = 0; i < ls.length; ++i) {
+      if (peek(ls[i], icase: icase)) return i;
+    }
+    return -1;
   }
 
   /// 匹配失败, 会回退位置
