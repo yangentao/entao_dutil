@@ -3,6 +3,14 @@ import 'dart:collection';
 import 'basic.dart';
 
 extension IterableExt<E> on Iterable<E> {
+  int count(bool Function(E) test) {
+    int n = 0;
+    for (E e in this) {
+      if (test(e)) n += 1;
+    }
+    return n;
+  }
+
   bool all(bool Function(E element) test) => every(test);
 
   Set<E> intersect(Iterable<E> other) {
