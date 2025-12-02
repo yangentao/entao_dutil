@@ -79,7 +79,7 @@ class TextScanner {
     return moveNext(terminator: (e) => ch == e && preChar != escapeChar);
   }
 
-  List<int> moveUntil(List<int> chars, {int? escapeChar}) {
+  List<int> moveUntil(Iterable<int> chars, {int? escapeChar}) {
     assert(chars.isNotEmpty);
     if (escapeChar == null) return moveNext(terminator: (e) => chars.contains(e));
     return moveNext(terminator: (e) => chars.contains(e) && preChar != escapeChar);

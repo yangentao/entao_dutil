@@ -212,19 +212,6 @@ class _YsonParser {
   }
 }
 
-Set<int> _WHITES = {CharCode.SP, CharCode.HTAB, CharCode.CR, CharCode.LF};
-Set<int> _SPTAB = {CharCode.SP, CharCode.HTAB};
-
-extension _TextScannerExt on TextScanner {
-  List<int> skipWhites() {
-    return skipChars(_WHITES);
-  }
-
-  void skipSpTab() {
-    skipChars(_SPTAB);
-  }
-}
-
 bool _isNum(int ch) {
   if (ch >= CharCode.NUM0 && ch <= CharCode.NUM9) return true;
   return ch == CharCode.DOT || ch == CharCode.MINUS || ch == CharCode.PLUS || ch == CharCode.e || ch == CharCode.E;
