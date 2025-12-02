@@ -28,3 +28,4 @@ export 'src/text_scanner.dart';
 export 'src/trans_call.dart';
 export 'src/xresult.dart';
 export 'src/yson.dart';
+export 'src/stack.dart';
