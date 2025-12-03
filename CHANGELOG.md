@@ -185,3 +185,7 @@
 
 ## 2.2.5
 * TextScanner
+
+## 2.2.6
+* remove EnConfig, 
+* move to new package 'entao_config'

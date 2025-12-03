@@ -12,7 +12,6 @@ export 'src/collection.dart';
 export 'src/collection_list.dart';
 export 'src/collection_sort.dart';
 export 'src/datetime.dart';
-export 'src/en_config.dart';
 export 'src/hex.dart';
 export 'src/json_result.dart';
 export 'src/label_value.dart';
