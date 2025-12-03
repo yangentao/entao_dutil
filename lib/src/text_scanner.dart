@@ -106,8 +106,9 @@ class TextScanner {
     return index;
   }
 
-  void expectChar(int ch) {
-    List<int> ls = moveNext(acceptor: (e) => ch == e && matched.isEmpty);
+  void expectChar(int ch, {int? escapeChar}) {
+    List<int> ls =
+        escapeChar == null ? moveNext(acceptor: (e) => ch == e && matched.isEmpty) : moveNext(acceptor: (e) => ch == e && matched.isEmpty && preChar != escapeChar);
     bool ok = ls.length == 1 && ls.first == ch;
     if (!ok) raise();
   }
@@ -131,7 +132,7 @@ class TextScanner {
     int i = peekAny(ls, icase: icase);
     if (i >= 0) {
       skip(size: ls[i].length);
-    }else {
+    } else {
       raise();
     }
     return i;
