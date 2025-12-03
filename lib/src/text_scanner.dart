@@ -332,10 +332,10 @@ String escapeCharCodes(List<int> textCodes, {required Map<int, int> map, int esc
       buf.add(escapeCode);
       buf.add(map[ch]!);
     } else if (ch < 32) {
-      buf._appendUnicodeEscaped(ch, unicodeChar: unicodeChar);
+      buf._escapeUtf16Char(ch, unicodeChar: unicodeChar);
     } else if (escapeUnicode && ch > _utf16Lead && (i + 1 < textCodes.length) && _isUtf16(ch, textCodes[i + 1])) {
-      buf._appendUnicodeEscaped(ch, unicodeChar: unicodeChar);
-      buf._appendUnicodeEscaped(textCodes[i + 1], unicodeChar: unicodeChar);
+      buf._escapeUtf16Char(ch, unicodeChar: unicodeChar);
+      buf._escapeUtf16Char(textCodes[i + 1], unicodeChar: unicodeChar);
       i += 1;
     } else {
       buf.add(ch);
@@ -358,7 +358,7 @@ bool _isUtf16(int a, int b) {
 }
 
 extension ListIntUnicodeEncodeExt on List<int> {
-  void _appendUnicodeEscaped(int ch, {int unicodeChar = CharCode.u}) {
+  void _escapeUtf16Char(int ch, {int unicodeChar = CharCode.u}) {
     this.add(CharCode.BSLASH);
     this.add(unicodeChar);
     if (ch > _utf16Lead) {
