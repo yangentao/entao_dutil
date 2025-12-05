@@ -61,6 +61,52 @@ extension ResultExtendsObject<T extends Object> on XResult<T> {
 }
 
 extension ResultExtendsAny on XResult {
+  R? extraValue<R>({int? index, String? key}) {
+    if (!success) return null;
+    if (key != null) {
+      if (extra case Map<String, dynamic> map) {
+        return map[key];
+      }
+      return null;
+    }
+    if (index != null) {
+      if (extra case List<dynamic> ls) {
+        return index >= 0 && index < ls.length ? ls[index] : null;
+      }
+      return null;
+    }
+    if (extra is R) {
+      return extra as R;
+    }
+    return null;
+  }
+
+  R? extraTransform<R, T>(R? Function(T) callback, {int? index, String? key}) {
+    if (!success) return null;
+    if (key != null) {
+      if (extra case Map<String, dynamic> map) {
+        if (map[key] case T vv) {
+          return callback(vv);
+        }
+      }
+      return null;
+    }
+    if (index != null) {
+      if (extra case List<dynamic> ls) {
+        if (index >= 0 && index < ls.length) {
+          if (ls[index] case T v) {
+            return callback(v);
+          }
+        }
+      }
+      return null;
+    }
+    if (extra case T v) {
+      return callback(v);
+    }
+    return null;
+  }
+
   /// ["id", "name", "score"]
   /// [1000, "Tom", 90]
   /// [1001, "Jerry", 80]
@@ -72,7 +118,7 @@ extension ResultExtendsAny on XResult {
 
   List<R> listModel<R>(R Function(Map<String, dynamic>) mapper) {
     if (success) {
-      if (null is R && value == null) return [];
+      if (value == null) return [];
       return (value as List<dynamic>).map((e) => mapper(e as Map<String, dynamic>)).toList();
     }
     raise("NOT success");
@@ -88,7 +134,7 @@ extension ResultExtendsAny on XResult {
 
   List<R> listValue<R, T>(R Function(T) mapper) {
     if (success) {
-      if (null is R && value == null) return [];
+      if (value == null) return [];
       return (value as List<dynamic>).map((e) => mapper(e as T)).toList();
     }
     raise("NOT success");
@@ -96,7 +142,7 @@ extension ResultExtendsAny on XResult {
 
   List<R> list<R>() {
     if (success) {
-      if (null is R && value == null) return [];
+      if (value == null) return [];
       return (value as List<dynamic>).map((e) => e as R).toList();
     }
     raise("NOT success");
@@ -112,7 +158,7 @@ extension ResultExtendsAny on XResult {
 
   XResult<List<R>> mapList<R, T>(R Function(T) mapper) {
     if (success) {
-      if (null is R && value == null) return XSuccess([], extra: extra);
+      if (value == null) return XSuccess([], extra: extra);
       List<R> ls = (value as List<dynamic>).map((e) => mapper(e as T)).toList();
       return XSuccess(ls, extra: extra);
     }
@@ -123,6 +169,36 @@ extension ResultExtendsAny on XResult {
     if (success) {
       if (null is R && value == null) return XSuccess(null as R, extra: extra);
       return XSuccess(mapper(value as T), extra: extra);
+    }
+    return this as XError;
+  }
+
+  XResult<R> mapModel<R>(R Function(Map<String, dynamic>) mapper) {
+    if (success) {
+      if (null is R && value == null) return XSuccess(null as R, extra: extra);
+      return XSuccess(mapper(value as Map<String, dynamic>), extra: extra);
+    }
+    return this as XError;
+  }
+
+  XResult<List<R>> mapModelList<R>(R Function(Map<String, dynamic>) mapper) {
+    if (success) {
+      if (value == null) return XSuccess([]);
+      List<R> ls = (value as List<dynamic>).map((e) => mapper(e as Map<String, dynamic>)).toList();
+      return XSuccess(ls, extra: extra);
+    }
+    return this as XError;
+  }
+
+  //  ["id", "name", "score"]
+  //  [1000, "Tom", 90]
+  //  [1001, "Jerry", 80]
+  /// 第一行是列名, 第二行开始是数据, 类似csv格式
+  XResult<List<R>> mapTable<R>(R Function(Map<String, dynamic>) mapper) {
+    if (success) {
+      if (value == null) return XSuccess([]);
+      List<R> ls = _dataTableFromList(rows: list(), maper: mapper);
+      return XSuccess(ls, extra: extra);
     }
     return this as XError;
   }
