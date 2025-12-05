@@ -189,3 +189,6 @@
 ## 2.2.6
 * remove EnConfig, 
 * move to new package 'entao_config'
+
+## 2.2.7
+* XResult

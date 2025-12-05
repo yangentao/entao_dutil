@@ -4,28 +4,42 @@ final class XResult<T> {
   final bool success;
   late final T value; // on success
   late final Object? extra; // on success
-  late final XError failure; // on failed
+  late final ErrorInfo error; // on failed
 
   XResult._success(this.value, {this.extra}) : success = true;
 
-  XResult._failed(this.failure) : success = false;
+  XResult._failed(this.error) : success = false;
 
   bool get failed => !success;
+
+  @override
+  String toString() {
+    if (success) {
+      return "XResult(success: true, value: $value, extra: $extra)";
+    } else {
+      return "XResult(success: false, error: $error)";
+    }
+  }
 }
 
 XResult<T> XSuccess<T>(T value, {Object? extra}) => XResult._success(value, extra: extra);
 
-XResult<T> XFailure<T>(XError failure) => XResult._failed(failure);
+XResult<T> XFailed<T>(ErrorInfo failure) => XResult._failed(failure);
 
-XResult<T> XFailed<T>(String message, {int? code, dynamic error, Object? data}) => XResult._failed(XError(message: message, code: code, error: error, data: data));
+XResult<T> XError<T>(String message, {int? code, dynamic error, Object? data}) => XResult._failed(ErrorInfo(message: message, code: code, error: error, data: data));
 
-class XError {
+class ErrorInfo {
   final String message;
   final int? code;
   final Object? data;
   final dynamic error;
 
-  XError({required this.message, this.code, this.error, this.data});
+  ErrorInfo({required this.message, this.code, this.error, this.data});
+
+  @override
+  String toString() {
+    return "ErrorInfo(message: $message, code: $code, data: $data, error: $error)";
+  }
 }
 
 extension ResultExtendsAny on XResult {
@@ -84,7 +98,7 @@ extension ResultExtendsAny on XResult {
       List<R> ls = (value as List<dynamic>).map((e) => mapper(e as T)).toList();
       return XSuccess(ls, extra: extra);
     }
-    return XFailure(failure);
+    return XFailed(error);
   }
 
   XResult<R> map<R, T>(R Function(T) mapper) {
@@ -92,14 +106,14 @@ extension ResultExtendsAny on XResult {
       if (null is R && value == null) return XSuccess(null as R, extra: extra);
       return XSuccess(mapper(value as T), extra: extra);
     }
-    return XFailure(failure);
+    return XFailed(error);
   }
 
   XResult<R> casted<R>() {
     if (success) {
       return XSuccess(value as R, extra: extra);
     }
-    return XFailure(failure);
+    return XFailed(error);
   }
 }
 
