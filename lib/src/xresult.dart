@@ -1,14 +1,12 @@
 import 'package:entao_dutil/entao_dutil.dart';
 
-final class XResult<T> {
+sealed class XResult<T> {
   final bool success;
   late final T value; // on success
   late final Object? extra; // on success
   late final ErrorInfo error; // on failed
 
-  XResult._success(this.value, {this.extra}) : success = true;
-
-  XResult._failed(this.error) : success = false;
+  XResult({required this.success});
 
   bool get failed => !success;
 
@@ -22,11 +20,22 @@ final class XResult<T> {
   }
 }
 
-XResult<T> XSuccess<T>(T value, {Object? extra}) => XResult._success(value, extra: extra);
+class XSuccess<T> extends XResult<T> {
+  XSuccess(T value, {Object? extra}) : super(success: true) {
+    this.value = value;
+    this.extra = extra;
+  }
+}
 
-XResult<T> XFailed<T>(ErrorInfo failure) => XResult._failed(failure);
+class XError extends XResult<Never> {
+  XError(String message, {int? code, dynamic error, Object? data}) : super(success: false) {
+    this.error = ErrorInfo(message: message, code: code, error: error, data: data);
+  }
 
-XResult<T> XError<T>(String message, {int? code, dynamic error, Object? data}) => XResult._failed(ErrorInfo(message: message, code: code, error: error, data: data));
+  XError.from(ErrorInfo errorInfo) : super(success: false) {
+    this.error = errorInfo;
+  }
+}
 
 class ErrorInfo {
   final String message;
@@ -39,6 +48,15 @@ class ErrorInfo {
   @override
   String toString() {
     return "ErrorInfo(message: $message, code: $code, data: $data, error: $error)";
+  }
+}
+
+extension ResultExtendsObject<T extends Object> on XResult<T> {
+  XResult<R> mapResult<R>(R Function(T) mapper) {
+    if (success) {
+      return XSuccess(mapper(value), extra: extra);
+    }
+    return this as XError;
   }
 }
 
@@ -98,22 +116,22 @@ extension ResultExtendsAny on XResult {
       List<R> ls = (value as List<dynamic>).map((e) => mapper(e as T)).toList();
       return XSuccess(ls, extra: extra);
     }
-    return XFailed(error);
+    return this as XError;
   }
 
-  XResult<R> map<R, T>(R Function(T) mapper) {
+  XResult<R> mapValue<R, T>(R Function(T) mapper) {
     if (success) {
       if (null is R && value == null) return XSuccess(null as R, extra: extra);
       return XSuccess(mapper(value as T), extra: extra);
     }
-    return XFailed(error);
+    return this as XError;
   }
 
   XResult<R> casted<R>() {
     if (success) {
       return XSuccess(value as R, extra: extra);
     }
-    return XFailed(error);
+    return this as XError;
   }
 }
 
