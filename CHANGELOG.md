@@ -198,3 +198,6 @@
 
 ## 2.2.9
 * XResult
+
+## 2.3.0
+* rename Stack to EStack

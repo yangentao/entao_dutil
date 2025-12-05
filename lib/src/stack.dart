@@ -1,48 +1,48 @@
 
-class Stack<T> extends Iterable<T> {
-  final List<T> _list = [];
+class EStack<T> extends Iterable<T> {
+  final List<T> list = [];
 
-  Stack();
-
-  @override
-  bool get isEmpty => _list.isEmpty;
+  EStack();
 
   @override
-  bool get isNotEmpty => _list.isNotEmpty;
+  bool get isEmpty => list.isEmpty;
+
+  @override
+  bool get isNotEmpty => list.isNotEmpty;
 
   T? getOr(int index) {
-    if (index >= 0 && index < _list.length) return _list[index];
+    if (index >= 0 && index < list.length) return list[index];
     return null;
   }
 
   T operator [](int index) {
-    return _list[index];
+    return list[index];
   }
 
   void operator []=(int index, T value) {
-    if (index == _list.length) {
-      _list.add(value);
+    if (index == list.length) {
+      list.add(value);
     } else {
-      _list[index] = value;
+      list[index] = value;
     }
   }
 
   void push(T value) {
-    _list.add(value);
+    list.add(value);
   }
 
   T? pop() {
-    if (_list.isEmpty) return null;
-    return _list.removeLast();
+    if (list.isEmpty) return null;
+    return list.removeLast();
   }
 
   T? peek() {
-    return _list.lastOrNull;
+    return list.lastOrNull;
   }
 
   @override
-  int get length => _list.length;
+  int get length => list.length;
 
   @override
-  Iterator<T> get iterator => _list.iterator;
+  Iterator<T> get iterator => list.iterator;
 }
