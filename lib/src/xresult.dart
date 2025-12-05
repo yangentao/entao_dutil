@@ -10,20 +10,18 @@ sealed class XResult<T> {
 
   bool get failed => !success;
 
-  @override
-  String toString() {
-    if (success) {
-      return "XResult(success: true, value: $value, extra: $extra)";
-    } else {
-      return "XResult(success: false, error: $error)";
-    }
-  }
+  T? get valueOrNull => success ? value : null;
 }
 
 class XSuccess<T> extends XResult<T> {
   XSuccess(T value, {Object? extra}) : super(success: true) {
     this.value = value;
     this.extra = extra;
+  }
+
+  @override
+  String toString() {
+    return "XSuccess(value: $value, extra: $extra)";
   }
 }
 
@@ -34,6 +32,11 @@ class XError extends XResult<Never> {
 
   XError.from(ErrorInfo errorInfo) : super(success: false) {
     this.error = errorInfo;
+  }
+
+  @override
+  String toString() {
+    return "XError(error: $error)";
   }
 }
 
