@@ -6,7 +6,7 @@ import 'package:entao_dutil/entao_dutil.dart';
 class TcpClient {
   Socket? socket;
   dynamic error;
-  FuncP<List<int>>? onData;
+  void Function(List<int>)? onData;
   VoidCallback? onError;
   VoidCallback? onClosed;
   VoidCallback? onConnectionChanged;

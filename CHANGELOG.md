@@ -201,3 +201,6 @@
 
 ## 2.3.0
 * rename Stack to EStack
+
+## 2.3.1
+* remove some typedef(s)

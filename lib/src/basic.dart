@@ -5,38 +5,13 @@ import 'dart:math' as math;
 import 'package:entao_dutil/entao_dutil.dart';
 import 'package:os_detect/os_detect.dart' as osd;
 
-typedef FutureVoid = Future<void>;
-typedef FutureBool = Future<bool>;
-typedef FutureInt = Future<int>;
-typedef FutureString = Future<String>;
+typedef VoidCallback = void Function();
+typedef FutureCallback = Future<void> Function();
+typedef FutureOrCallback = FutureOr<void> Function();
 
 typedef Predicate<T> = bool Function(T);
 typedef OnValue<T> = void Function(T value);
 typedef OnLabel<T> = String Function(T value);
-
-typedef VoidCallback = void Function();
-typedef FuncVoid = void Function();
-typedef VoidFunc = void Function();
-typedef FuncP<P> = void Function(P);
-typedef RFunc<R> = R Function();
-typedef RFuncP<R, P> = R Function(P);
-
-typedef BoolFunc = bool Function();
-typedef NumFunc = num Function();
-typedef IntFunc = int Function();
-typedef DoubleFunc = double Function();
-typedef StringFunc = String Function();
-
-typedef FuncBool = void Function(bool);
-typedef FuncNum = void Function(num value);
-typedef FuncInt = void Function(int value);
-typedef FuncDouble = void Function(double value);
-typedef FuncString = void Function(String text);
-
-typedef ListBool = List<bool>;
-typedef ListInt = List<int>;
-typedef ListDouble = List<double>;
-typedef ListString = List<String>;
 
 typedef AnyMap = Map<String, dynamic>;
 typedef AnyList = List<dynamic>;
@@ -51,6 +26,8 @@ const int KB = 1024;
 
 int get millsNow => DateTime.now().millisecondsSinceEpoch;
 
+DateTime get timeNow => DateTime.now();
+
 extension LetBlock<T> on T {
   R let<R>(R Function(T e) block) => block(this);
 
@@ -60,11 +37,11 @@ extension LetBlock<T> on T {
   }
 }
 
-class PairVar<A, B> {
+class Pair<A, B> {
   final A first;
   final B second;
 
-  PairVar(this.first, this.second);
+  Pair(this.first, this.second);
 }
 
 class OSDetect {
@@ -107,8 +84,8 @@ T? castValue<T>(Object? value) {
   return value is T ? value : null;
 }
 
-Future<void> asyncCall(VoidCallback callback) async {
-  callback();
+Future<R> asyncCall<R>(R Function() callback) async {
+  return callback();
 }
 
 Future<void> delayMills(int millSeconds, [FutureOr<void> Function()? callback]) {
@@ -307,10 +284,11 @@ class Tick {
   int get current => millsNow - lastTime;
 
   int tick([bool output = true]) {
-    var now = millsNow;
+    final t = timeNow;
+    var now = t.microsecondsSinceEpoch;
     var delta = now - lastTime;
     lastTime = now;
-    if (output) print(delta);
+    if (output) print("${t.formatDateTimeX}: $delta");
     return delta;
   }
 }

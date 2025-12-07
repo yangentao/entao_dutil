@@ -5,6 +5,11 @@ import 'package:entao_dutil/src/collection.dart';
 import 'basic.dart';
 
 extension ListExtensions<T> on List<T> {
+  String joinMap(String sep, [String Function(T)? tranform]) {
+    if (tranform == null) return join(sep);
+    return this.map(tranform).join(sep);
+  }
+
   T? get second => this.getOr(1);
 
   T? get third => this.getOr(2);

@@ -1,6 +1,6 @@
 import 'basic.dart';
 
-FuncVoid? bindOne<T>(T value, FuncP<T>? callback) {
+void Function()? bindOne<T>(T value, void Function(T)? callback) {
   if (callback == null) return null;
   return OneBinder<T>(value, callback).call;
 }
@@ -15,14 +15,14 @@ void Function(A)? bindSecond<A, B>(B value, void Function(A, B)? callback) {
   return TwoBinder<A, B>(callback).bindSecond(value);
 }
 
-VoidFunc? bindBoth<A, B>(A first, B second, void Function(A, B)? callback) {
+void Function()? bindBoth<A, B>(A first, B second, void Function(A, B)? callback) {
   if (callback == null) return null;
   return TwoBinder<A, B>(callback).bindBoth(first, second);
 }
 
 class OneBinder<A> {
   A value;
-  FuncP<A> callback;
+  void Function(A) callback;
 
   OneBinder(this.value, this.callback);
 
@@ -48,7 +48,7 @@ class TwoBinder<A, B> {
     return callA;
   }
 
-  VoidFunc bindBoth(A first, B second) {
+  void Function() bindBoth(A first, B second) {
     firstValue = first;
     secondValue = second;
     return call;
@@ -67,7 +67,7 @@ class TwoBinder<A, B> {
   }
 }
 
-FuncP<T> unbindOne<T>(VoidCallback action) {
+void Function(T) unbindOne<T>(VoidCallback action) {
   return UnbindOne<T>(action).call;
 }
 

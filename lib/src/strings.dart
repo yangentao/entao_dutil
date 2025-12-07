@@ -9,6 +9,16 @@ import 'package:uuid/uuid.dart';
 const Uuid _uuid = Uuid();
 
 extension StringNullableExt on String? {
+  String ifEmpty(String Function() callback) {
+    if (this == null || this!.isEmpty) return callback();
+    return this!;
+  }
+
+  String operator |(String other) {
+    if (this == null || this!.isEmpty) return other;
+    return this!;
+  }
+
   bool get nullOrEmpty => this == null || this!.isEmpty;
 
   bool get nullOrBlank => this == null || this!.trim().isEmpty;
