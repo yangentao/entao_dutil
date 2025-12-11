@@ -24,7 +24,7 @@ const int GB = 1024 * 1024 * 1024;
 const int MB = 1024 * 1024;
 const int KB = 1024;
 
-int get millsNow => DateTime.now().millisecondsSinceEpoch;
+int get millsNow => DateTime.now().milliSeconds1970;
 
 DateTime get timeNow => DateTime.now();
 
@@ -285,7 +285,7 @@ class Tick {
 
   int tick([bool output = true]) {
     final t = timeNow;
-    var now = t.microsecondsSinceEpoch;
+    var now = t.milliSeconds1970;
     var delta = now - lastTime;
     lastTime = now;
     if (output) print("${t.formatDateTimeX}: $delta");

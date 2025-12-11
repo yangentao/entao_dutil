@@ -204,3 +204,5 @@
 
 ## 2.3.1
 * remove some typedef(s)
+## 2.3.2
+* fix Tick.tick() issue
