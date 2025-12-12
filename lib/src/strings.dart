@@ -111,7 +111,6 @@ class IgnoreCase {
   static const int _Z = 0x5A;
   static const int _a = 0x61;
   static const int _z = 0x7A;
-  static const int _delta = 0x20;
 
   static bool isUpper(int ch) => ch >= _A && ch <= _Z;
 
