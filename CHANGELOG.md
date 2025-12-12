@@ -206,3 +206,6 @@
 * remove some typedef(s)
 ## 2.3.2
 * fix Tick.tick() issue
+
+## 2.3.3
+* ignore case

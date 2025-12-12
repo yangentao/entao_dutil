@@ -120,19 +120,7 @@ class IgnoreCase {
   static bool equals(String left, String right) {
     if (left.length != right.length) return false;
     for (int i = 0; i < left.length; ++i) {
-      final int chA = left.codeUnitAt(i);
-      final int chB = right.codeUnitAt(i);
-      if (chA == chB) continue;
-      if (isUpper(chA)) {
-        if (isLower(chB)) {
-          if (chA + _delta == chB) continue;
-        }
-      } else if (isLower(chA)) {
-        if (isUpper(chB)) {
-          if (chA - _delta == chB) continue;
-        }
-      }
-      return false;
+      if (!CharCode.icaseEqual(left.codeUnitAt(i), right.codeUnitAt(i))) return false;
     }
     return true;
   }
@@ -140,28 +128,8 @@ class IgnoreCase {
   static int compare(String left, String right) {
     int count = left.length > right.length ? right.length : left.length;
     for (int i = 0; i < count; ++i) {
-      final int chA = left.codeUnitAt(i);
-      final int chB = right.codeUnitAt(i);
-      if (chA == chB) continue;
-      if (isUpper(chA)) {
-        if (isUpper(chB)) return chA - chB;
-        if (isLower(chB)) {
-          int c = chA + _delta - chB;
-          if (c == 0) continue;
-          return c;
-        }
-        return chA - chB;
-      } else if (isLower(chA)) {
-        if (isLower(chB)) return chA - chB;
-        if (isUpper(chB)) {
-          int c = chA - _delta - chB;
-          if (c == 0) continue;
-          return c;
-        }
-        return chA - chB;
-      } else {
-        return chA - chB;
-      }
+      int c = CharCode.icaseCompare(left.codeUnitAt(i), right.codeUnitAt(i));
+      if (c != 0) return c;
     }
     return left.length - right.length;
   }

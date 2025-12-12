@@ -36,6 +36,19 @@ class CharCode {
     return left == right;
   }
 
+  static int icaseCompare(int left, int right) {
+    if (left >= a && left <= z) {
+      if (right >= A && right <= Z) {
+        return left - 32 - right;
+      }
+    } else if (left >= A && left <= Z) {
+      if (right >= a && right <= z) {
+        return left + 32 - right;
+      }
+    }
+    return left - right;
+  }
+
   static const List<int> SP_TAB = [SP, HTAB];
   static const List<int> SP_TAB_CR_LF = [SP, HTAB, CR, LF];
   static const List<int> CR_LF = [CR, LF];
