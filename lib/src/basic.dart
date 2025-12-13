@@ -127,6 +127,43 @@ void mergeCall(Object key, VoidCallback callback, {int delay = 1000, bool interv
   Future.delayed(Duration(milliseconds: delay), invokeCallback);
 }
 
+class TriggerCall {
+  final void Function() _callback;
+  final int _delay;
+  final bool _interval;
+  int _lastTime = 0;
+
+  TriggerCall(this._callback, {int delay = 1000, bool interval = false})
+      : _interval = interval,
+        _delay = delay;
+
+  void trigger() {
+    int mills = DateTime.now().millisecondsSinceEpoch;
+    if (_lastTime + _delay > mills) {
+      _lastTime = mills;
+      return;
+    }
+    _lastTime = mills;
+
+    void invokeCallback() {
+      if (_interval) {
+        _lastTime = 0;
+        _callback();
+      } else {
+        if (_lastTime == 0) return;
+        int leftMills = _lastTime + _delay - DateTime.now().millisecondsSinceEpoch;
+        if (leftMills <= 0) {
+          _lastTime = 0;
+          _callback();
+        } else {
+          Future.delayed(Duration(milliseconds: leftMills), invokeCallback);
+        }
+      }
+    }
+
+    Future.delayed(Duration(milliseconds: _delay), invokeCallback);
+  }
+}
 extension UriAppendArgumentsExt on Uri {
   /// 返回新的Uri
   Uri appendParams(Map<String, String> args) {

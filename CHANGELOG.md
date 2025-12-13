@@ -209,3 +209,6 @@
 
 ## 2.3.3
 * ignore case
+
+## 2.3.4
+* TriggerCall
